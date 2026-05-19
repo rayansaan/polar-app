@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
-  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,6 +14,7 @@ import { colors, spacing, typography, borderRadius } from '../../theme';
 import { useAppStore } from '../../store';
 import { useAuthStore } from '../../store/authStore';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RatingStars } from '../../components/RatingStars';
 
 const { width } = Dimensions.get('window');
 
@@ -30,12 +30,24 @@ type Props = NativeStackScreenProps<RootStackParamList, 'MovieDetail'>;
 
 export const MovieDetailScreen = ({ navigation, route }: Props) => {
   const { movieId } = route.params;
-  const { getMovieById } = useAppStore();
-  const { favorites, addFavorite, removeFavorite, isAuthenticated } = useAuthStore();
+  const { getMovieById, movies } = useAppStore();
+  const { 
+    favorites, 
+    addFavorite, 
+    removeFavorite, 
+    isAuthenticated,
+    watchlist,
+    addToWatchlist,
+    removeFromWatchlist,
+    rateMovie,
+    removeRating,
+    getUserRating,
+  } = useAuthStore();
   
   const [activeTab, setActiveTab] = useState<TabType>('infos');
   const [selectedScene, setSelectedScene] = useState<any>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
+  const [userRating, setUserRating] = useState<number | null>(getUserRating(movieId));
 
   const movie = getMovieById(movieId);
   
@@ -48,6 +60,8 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
   }
 
   const isFavorite = favorites.some((f) => f.movie_id === movieId);
+  const watchlistItem = watchlist.find((w) => w.movieId === movieId);
+  const isInWatchlist = !!watchlistItem;
 
   const toggleFavorite = async () => {
     if (!isAuthenticated) {
@@ -60,6 +74,52 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
     } else {
       await addFavorite(movieId);
     }
+  };
+
+  const toggleWatchlist = async () => {
+    if (!isAuthenticated) {
+      navigation.navigate('Auth' as any);
+      return;
+    }
+
+    if (isInWatchlist) {
+      await removeFromWatchlist(movieId);
+    } else {
+      await addToWatchlist(movieId, 'à_voir');
+    }
+  };
+
+  const handleRate = async (rating: number) => {
+    if (!isAuthenticated) {
+      navigation.navigate('Auth' as any);
+      return;
+    }
+
+    if (userRating === rating) {
+      await removeRating(movieId);
+      setUserRating(null);
+    } else {
+      await rateMovie(movieId, rating);
+      setUserRating(rating);
+    }
+  };
+
+  const getSimilarMovies = () => {
+    return movies
+      .filter((m) => m.id !== movieId)
+      .map((m) => {
+        let score = 0;
+        if (m.director === movie.director) score += 3;
+        const commonGenres = m.genres.filter((g) => movie.genres.includes(g));
+        score += commonGenres.length * 2;
+        const commonKeywords = m.keywords.filter((k) => movie.keywords.includes(k));
+        score += commonKeywords.length;
+        return { movie: m, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map((item) => item.movie);
   };
 
   const renderHeader = () => (
@@ -83,17 +143,48 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
           
           <View style={styles.heroActions}>
             <TouchableOpacity 
-              style={[styles.favoriteButton, isFavorite && styles.favoriteButtonActive]}
+              style={[styles.actionButton, isFavorite && styles.actionButtonActive]}
               onPress={toggleFavorite}
             >
-              <Text style={styles.favoriteIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
-              <Text style={styles.favoriteText}>
-                {isFavorite ? 'Favori' : 'Ajouter aux favoris'}
+              <Text style={styles.actionIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
+              <Text style={styles.actionText}>
+                {isFavorite ? 'Favori' : 'Favoris'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.actionButton, isInWatchlist && styles.actionButtonActive]}
+              onPress={toggleWatchlist}
+            >
+              <Text style={styles.actionIcon}>{isInWatchlist ? '✅' : '📋'}</Text>
+              <Text style={styles.actionText}>
+                {isInWatchlist 
+                  ? watchlistItem?.status === 'vu' 
+                    ? 'Vu' 
+                    : watchlistItem?.status === 'en_cours' 
+                      ? 'En cours' 
+                      : 'À voir'
+                  : 'À voir'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>
+    </View>
+  );
+
+  const renderUserRating = () => (
+    <View style={styles.userRatingSection}>
+      <Text style={styles.sectionTitle}>Votre Note</Text>
+      <View style={styles.userRatingContainer}>
+        <RatingStars 
+          rating={userRating || 0} 
+          interactive 
+          onRate={handleRate}
+          size={32}
+        />
+        {!userRating && <Text style={styles.rateHint}>Appuyez pour noter</Text>}
+      </View>
     </View>
   );
 
@@ -126,6 +217,8 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
         </View>
       </View>
 
+      {renderUserRating()}
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Synopsis</Text>
         <Text style={styles.synopsis}>{movie.synopsis}</Text>
@@ -153,8 +246,40 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
           ))}
         </View>
       </View>
+
+      {renderSimilarMovies()}
     </View>
   );
+
+  const renderSimilarMovies = () => {
+    const similar = getSimilarMovies();
+    if (similar.length === 0) return null;
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Vous aimerez aussi</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {similar.map((similarMovie) => (
+            <TouchableOpacity
+              key={similarMovie.id}
+              style={styles.similarCard}
+              onPress={() => {
+                navigation.setParams({ movieId: similarMovie.id });
+                setUserRating(getUserRating(similarMovie.id));
+                setActiveTab('infos');
+              }}
+            >
+              <View style={styles.similarPoster}>
+                <Text style={styles.similarEmoji}>🎬</Text>
+              </View>
+              <Text style={styles.similarTitle} numberOfLines={1}>{similarMovie.title}</Text>
+              <Text style={styles.similarMeta}>{similarMovie.year} • ★ {similarMovie.polarRating}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
 
   const renderAnalyses = () => (
     <View style={styles.tabContent}>
@@ -201,6 +326,9 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
             <Text style={styles.castName}>{member.name}</Text>
             <Text style={styles.castCharacter}>{member.character}</Text>
           </View>
+          <TouchableOpacity style={styles.castButton}>
+            <Text style={styles.castButtonText}>Filmographie</Text>
+          </TouchableOpacity>
         </View>
       ))}
     </View>
@@ -325,23 +453,27 @@ const styles = StyleSheet.create({
   },
   heroActions: {
     flexDirection: 'row',
+    gap: spacing.md,
   },
-  favoriteButton: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.round,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  favoriteButtonActive: {
+  actionButtonActive: {
     backgroundColor: colors.primaryDark,
+    borderColor: colors.primaryDark,
   },
-  favoriteIcon: {
+  actionIcon: {
     fontSize: 18,
     marginRight: spacing.sm,
   },
-  favoriteText: {
+  actionText: {
     ...typography.bodySmall,
     color: colors.text,
   },
@@ -391,6 +523,20 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
   },
+  userRatingSection: {
+    marginBottom: spacing.lg,
+  },
+  userRatingContainer: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  rateHint: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
   section: {
     marginBottom: spacing.lg,
   },
@@ -432,6 +578,30 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   keywordText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  similarCard: {
+    width: 120,
+    marginRight: spacing.md,
+  },
+  similarPoster: {
+    width: 120,
+    height: 180,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  similarEmoji: {
+    fontSize: 40,
+  },
+  similarTitle: {
+    ...typography.bodySmall,
+    color: colors.text,
+    marginTop: spacing.sm,
+  },
+  similarMeta: {
     ...typography.caption,
     color: colors.textSecondary,
   },
@@ -516,6 +686,17 @@ const styles = StyleSheet.create({
   castCharacter: {
     ...typography.bodySmall,
     color: colors.textSecondary,
+  },
+  castButton: {
+    backgroundColor: colors.primaryDark,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
+  castButtonText: {
+    ...typography.caption,
+    color: colors.text,
+    fontWeight: '600',
   },
   bottomPadding: {
     height: 100,

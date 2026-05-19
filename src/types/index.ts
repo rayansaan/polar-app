@@ -97,6 +97,25 @@ export interface UserPreferences {
   favoriteDirectors: string[];
 }
 
+export type WatchlistStatus = 'à_voir' | 'vu' | 'en_cours';
+
+export interface WatchlistItem {
+  id: string;
+  movieId: string;
+  status: WatchlistStatus;
+  priority: number;
+  addedAt: Date;
+  notes?: string;
+}
+
+export interface UserRating {
+  id: string;
+  movieId: string;
+  rating: number;
+  review?: string;
+  createdAt: Date;
+}
+
 export type FilterType = 'films' | 'series' | 'directors' | 'writers' | 'actors';
 
 export interface GraphNode {
