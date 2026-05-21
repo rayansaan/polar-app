@@ -12,42 +12,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import { useAppStore } from '../../store';
-import { useAuthStore } from '../../store/authStore';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RatingStars } from '../../components/RatingStars';
 
 const { width } = Dimensions.get('window');
 
-type RootStackParamList = {
-  Onboarding: undefined;
-  Main: undefined;
-  MovieDetail: { movieId: string };
-};
-
 type TabType = 'infos' | 'analyses' | 'casting';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'MovieDetail'>;
-
-export const MovieDetailScreen = ({ navigation, route }: Props) => {
+export const MovieDetailScreen = ({ navigation, route }: any) => {
   const { movieId } = route.params;
   const { getMovieById, movies } = useAppStore();
-  const { 
-    favorites, 
-    addFavorite, 
-    removeFavorite, 
-    isAuthenticated,
-    watchlist,
-    addToWatchlist,
-    removeFromWatchlist,
-    rateMovie,
-    removeRating,
-    getUserRating,
-  } = useAuthStore();
-  
   const [activeTab, setActiveTab] = useState<TabType>('infos');
   const [selectedScene, setSelectedScene] = useState<any>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
-  const [userRating, setUserRating] = useState<number | null>(getUserRating(movieId));
+  const [userRating, setUserRating] = useState<number | null>(null);
 
   const movie = getMovieById(movieId);
   
@@ -59,47 +36,21 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
     );
   }
 
-  const isFavorite = favorites.some((f) => f.movie_id === movieId);
-  const watchlistItem = watchlist.find((w) => w.movieId === movieId);
-  const isInWatchlist = !!watchlistItem;
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   const toggleFavorite = async () => {
-    if (!isAuthenticated) {
-      navigation.navigate('Auth' as any);
-      return;
-    }
-    
-    if (isFavorite) {
-      await removeFavorite(movieId);
-    } else {
-      await addFavorite(movieId);
-    }
+    setIsFavorite(!isFavorite);
   };
 
   const toggleWatchlist = async () => {
-    if (!isAuthenticated) {
-      navigation.navigate('Auth' as any);
-      return;
-    }
-
-    if (isInWatchlist) {
-      await removeFromWatchlist(movieId);
-    } else {
-      await addToWatchlist(movieId, 'à_voir');
-    }
+    setIsInWatchlist(!isInWatchlist);
   };
 
   const handleRate = async (rating: number) => {
-    if (!isAuthenticated) {
-      navigation.navigate('Auth' as any);
-      return;
-    }
-
     if (userRating === rating) {
-      await removeRating(movieId);
       setUserRating(null);
     } else {
-      await rateMovie(movieId, rating);
       setUserRating(rating);
     }
   };
@@ -146,7 +97,7 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
               style={[styles.actionButton, isFavorite && styles.actionButtonActive]}
               onPress={toggleFavorite}
             >
-              <Text style={styles.actionIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
+              <Text style={styles.actionIcon}>{isFavorite ? 'Favori' : 'Ajouter'}</Text>
               <Text style={styles.actionText}>
                 {isFavorite ? 'Favori' : 'Favoris'}
               </Text>
@@ -156,15 +107,9 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
               style={[styles.actionButton, isInWatchlist && styles.actionButtonActive]}
               onPress={toggleWatchlist}
             >
-              <Text style={styles.actionIcon}>{isInWatchlist ? '✅' : '📋'}</Text>
+              <Text style={styles.actionIcon}>{isInWatchlist ? 'Liste' : 'Ajouter'}</Text>
               <Text style={styles.actionText}>
-                {isInWatchlist 
-                  ? watchlistItem?.status === 'vu' 
-                    ? 'Vu' 
-                    : watchlistItem?.status === 'en_cours' 
-                      ? 'En cours' 
-                      : 'À voir'
-                  : 'À voir'}
+                {isInWatchlist ? 'En liste' : 'À voir'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -270,7 +215,7 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
               }}
             >
               <View style={styles.similarPoster}>
-                <Text style={styles.similarEmoji}>🎬</Text>
+                <Text style={styles.similarEmoji}>Film</Text>
               </View>
               <Text style={styles.similarTitle} numberOfLines={1}>{similarMovie.title}</Text>
               <Text style={styles.similarMeta}>{similarMovie.year} • ★ {similarMovie.polarRating}</Text>
@@ -304,7 +249,7 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
               </Text>
               <View style={styles.hotspotCount}>
                 <Text style={styles.hotspotCountText}>
-                  🔍 {scene.hotspots.length} hotspot{scene.hotspots.length !== 1 ? 's' : ''}
+                  {scene.hotspots.length} hotspot{scene.hotspots.length !== 1 ? 's' : ''}
                 </Text>
               </View>
             </View>
@@ -320,7 +265,7 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
       {movie.cast.map((member, index) => (
         <View key={index} style={styles.castItem}>
           <View style={styles.castAvatar}>
-            <Text style={styles.castEmoji}>👤</Text>
+            <Text style={styles.castEmoji}>Acteur</Text>
           </View>
           <View style={styles.castInfo}>
             <Text style={styles.castName}>{member.name}</Text>
@@ -343,12 +288,12 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <TouchableOpacity 
-            style={styles.modalClose}
-            onPress={() => setSelectedScene(null)}
-          >
-            <Text style={styles.modalCloseText}>✕</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.modalClose}
+              onPress={() => setSelectedScene(null)}
+            >
+              <Text style={styles.modalCloseText}>Fermer</Text>
+            </TouchableOpacity>
           
           {selectedScene && (
             <>
@@ -363,7 +308,7 @@ export const MovieDetailScreen = ({ navigation, route }: Props) => {
                   style={styles.hotspotItem}
                   onPress={() => setSelectedHotspot(hotspot)}
                 >
-                  <Text style={styles.hotspotTitle}>📍 {hotspot.title}</Text>
+                  <Text style={styles.hotspotTitle}>Point: {hotspot.title}</Text>
                 </TouchableOpacity>
               ))}
             </>

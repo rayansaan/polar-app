@@ -45,7 +45,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
   const renderMapView = () => (
     <View style={styles.mapContainer}>
       <View style={styles.mapBackground}>
-        <Text style={styles.mapEmoji}>🎯</Text>
+        <Text style={styles.mapEmoji}>Cible</Text>
       </View>
       
       {nodes.map((node) => (
@@ -98,7 +98,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
         {DEMO_DIRECTORS.slice(0, 8).map((director, index) => (
           <TouchableOpacity key={index} style={styles.listItem}>
             <View style={styles.listItemIcon}>
-              <Text>🎬</Text>
+              <Text>Film</Text>
             </View>
             <Text style={styles.listItemText}>{director}</Text>
             <Text style={styles.listItemArrow}>›</Text>
@@ -111,7 +111,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
         {GENRES.slice(0, 6).map((genre, index) => (
           <TouchableOpacity key={index} style={styles.listItem}>
             <View style={styles.listItemIcon}>
-              <Text>🎭</Text>
+              <Text>Genre</Text>
             </View>
             <Text style={styles.listItemText}>{genre}</Text>
             <Text style={styles.listItemArrow}>›</Text>
@@ -130,7 +130,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
           onPress={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
         >
           <Text style={styles.viewToggleText}>
-            {viewMode === 'map' ? '📋 Liste' : '🗺️ Map'}
+            {viewMode === 'map' ? 'Liste' : 'Carte'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -141,11 +141,11 @@ export const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
         <View style={styles.detailCard}>
           <View style={styles.detailHeader}>
             <Text style={styles.detailType}>
-              {selectedNode.type === 'movie' ? '🎬 Film' : 
-               selectedNode.type === 'director' ? '🎬 Réalisateur' : '🎭 Genre'}
+              {selectedNode.type === 'movie' ? 'Film' : 
+               selectedNode.type === 'director' ? 'Réalisateur' : 'Genre'}
             </Text>
             <TouchableOpacity onPress={() => setSelectedNode(null)}>
-              <Text style={styles.detailClose}>✕</Text>
+              <Text style={styles.detailClose}>Fermer</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.detailTitle}>{selectedNode.label}</Text>

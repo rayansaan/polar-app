@@ -54,8 +54,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
       <View style={styles.videoPlaceholder}>
-        <Text style={styles.videoEmoji}>🎬</Text>
-        <Text style={styles.videoText}>Vidéo背景</Text>
+        <Text style={styles.videoEmoji}>Film</Text>
+        <Text style={styles.videoText}>Vidéo</Text>
       </View>
       
       <View style={styles.contentContainer}>
@@ -145,7 +145,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }
 
       <View style={styles.tutorialContainer}>
         <View style={styles.tutorialImage}>
-          <Text style={styles.tutorialEmoji}>🎥</Text>
+          <Text style={styles.tutorialEmoji}>Vidéo</Text>
           
           {!tutorialCompleted ? (
             <TouchableOpacity
@@ -159,7 +159,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }
             </TouchableOpacity>
           ) : (
             <View style={styles.tutorialSuccess}>
-              <Text style={styles.successEmoji}>✓</Text>
+              <Text style={styles.successEmoji}>OK</Text>
               <Text style={styles.successText}>
                 Analyse : Le jeu de lumière sur le personnage révèle sa tension intérieure
               </Text>

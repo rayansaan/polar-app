@@ -484,31 +484,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   
   initializeAuth: async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const userData: User = {
-          id: user.id,
-          email: user.email!,
-          displayName: user.user_metadata?.displayName || 'User',
-          createdAt: new Date(),
-        };
-        
-        set({ user: userData, isAuthenticated: true, isLoading: false });
-        
-        await get().fetchProfile();
-        await get().fetchFavorites();
-        await get().fetchAnnotations();
-        await get().fetchPreferences();
-        await get().fetchWatchlist();
-        await get().fetchRatings();
-      } else {
-        set({ isLoading: false });
+    // Auth bypassed - always authenticated
+    set({ 
+      isAuthenticated: true, 
+      isLoading: false,
+      user: {
+        id: 'demo-user',
+        email: 'demo@polar.app',
+        displayName: 'Explorateur Polar',
+        createdAt: new Date(),
       }
-    } catch (error) {
-      console.error('Initialize auth error:', error);
-      set({ isLoading: false });
-    }
+    });
   },
 }));

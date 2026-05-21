@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import { useAppStore } from '../store';
-import { useAuthStore } from '../store/authStore';
+import { useBreakpoint } from '../utils/responsive';
+import { Sidebar } from '../components/Sidebar';
 
 import { HomeScreen } from '../screens/home';
 import { SearchScreen } from '../screens/search';
@@ -13,7 +14,6 @@ import { MapScreen } from '../screens/map';
 import { ProfileScreen } from '../screens/profile';
 import { MovieDetailScreen } from '../screens/movie';
 import { OnboardingScreen } from '../screens/onboarding';
-import { LoginScreen, RegisterScreen } from '../screens/auth';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,7 +40,7 @@ const MainTabs = () => {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Actualité',
-          tabBarIcon: ({ focused }) => <TabIcon icon="📰" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Actu" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -48,15 +48,15 @@ const MainTabs = () => {
         component={SearchScreen}
         options={{
           tabBarLabel: 'Recherche',
-          tabBarIcon: ({ focused }) => <TabIcon icon="🔍" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Rech." focused={focused} />,
         }}
       />
       <Tab.Screen
         name="Map"
         component={MapScreen}
         options={{
-          tabBarLabel: 'Map',
-          tabBarIcon: ({ focused }) => <TabIcon icon="🗺️" focused={focused} />,
+          tabBarLabel: 'Carte',
+          tabBarIcon: ({ focused }) => <TabIcon icon="Carte" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -64,34 +64,50 @@ const MainTabs = () => {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profil',
-          tabBarIcon: ({ focused }) => <TabIcon icon="👤" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon icon="Profil" focused={focused} />,
         }}
       />
     </Tab.Navigator>
   );
 };
 
-const AuthStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-      contentStyle: { backgroundColor: colors.background },
-    }}
-  >
-    <Stack.Screen name="Login" component={LoginScreen} />
-    <Stack.Screen name="Register" component={RegisterScreen} />
-  </Stack.Navigator>
-);
+const DesktopLayout = () => {
+  const [activeScreen, setActiveScreen] = useState('Home');
+
+  const renderScreen = () => {
+    switch (activeScreen) {
+      case 'Home':
+        return <HomeScreen navigation={{ navigate: () => {} }} />;
+      case 'Search':
+        return <SearchScreen navigation={{ navigate: () => {} }} />;
+      case 'Map':
+        return <MapScreen navigation={{ navigate: () => {} }} />;
+      case 'Profile':
+        return <ProfileScreen navigation={{ navigate: () => {} }} />;
+      default:
+        return <HomeScreen navigation={{ navigate: () => {} }} />;
+    }
+  };
+
+  return (
+    <View style={styles.desktopContainer}>
+      <Sidebar activeRoute={activeScreen} onNavigate={setActiveScreen} />
+      <View style={styles.desktopContent}>
+        {renderScreen()}
+      </View>
+    </View>
+  );
+};
 
 export const AppNavigator = () => {
   const { isOnboardingComplete, isLoading: appLoading } = useAppStore();
-  const { isAuthenticated, isLoading: authLoading, initializeAuth } = useAuthStore();
+  const { isDesktop } = useBreakpoint();
 
   useEffect(() => {
-    initializeAuth();
+    // Auth bypassed - no initialization needed
   }, []);
 
-  if (appLoading || authLoading) {
+  if (appLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>POLAR</Text>
@@ -109,8 +125,8 @@ export const AppNavigator = () => {
       >
         {!isOnboardingComplete ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        ) : !isAuthenticated ? (
-          <Stack.Screen name="Auth" component={AuthStack} />
+        ) : isDesktop ? (
+          <Stack.Screen name="Main" component={DesktopLayout} />
         ) : (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
@@ -158,11 +174,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabIcon: {
-    fontSize: 24,
+    fontSize: 12,
     opacity: 0.6,
   },
   tabIconFocused: {
     opacity: 1,
+  },
+  desktopContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  desktopContent: {
+    flex: 1,
   },
 });
 

@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import { useAppStore } from '../../store';
-import { useAuthStore } from '../../store/authStore';
 import { GENRES } from '../../data/demoMovies';
 
 interface ProfileScreenProps {
@@ -19,15 +18,17 @@ interface ProfileScreenProps {
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const { setOnboardingComplete } = useAppStore();
-  const { 
-    user, 
-    profile,
-    favorites, 
-    preferences,
-    watchlist,
-    ratings,
-    signOut,
-  } = useAuthStore();
+  
+  // Auth bypassed - using demo data
+  const userData = {
+    displayName: 'Explorateur Polar',
+    email: 'demo@polar.app'
+  };
+  const profile = null;
+  const favorites: any[] = [];
+  const preferences = null;
+  const watchlist: any[] = [];
+  const ratings: any[] = [];
 
   const handleLogout = () => {
     Alert.alert(
@@ -39,7 +40,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           text: 'Se déconnecter', 
           style: 'destructive',
           onPress: async () => {
-            await signOut();
             setOnboardingComplete(false);
           }
         },
@@ -47,11 +47,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     );
   };
 
-  const favoriteMovies = favorites.map((f) => f.movie_id);
-
   const getGenreNames = (genreIndices: number[]) => {
     return genreIndices.map(i => GENRES[i] || '').filter(Boolean);
   };
+
+  const favoriteMovies = favorites.map((f: any) => f.movie_id || f);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -62,13 +62,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarEmoji}>👤</Text>
+            <Text style={styles.avatarEmoji}>Avatar</Text>
           </View>
           <Text style={styles.profileName}>
-            {profile?.display_name || user?.displayName || 'Explorateur Polar'}
+            {profile?.display_name || userData?.displayName || 'Explorateur Polar'}
           </Text>
           <Text style={styles.profileEmail}>
-            {user?.email || 'Compte démo'}
+            {userData?.email || 'Compte démo'}
           </Text>
         </View>
 
@@ -104,7 +104,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   onPress={() => navigation.navigate('MovieDetail', { movieId })}
                 >
                   <View style={styles.favoritePoster}>
-                    <Text style={styles.favoriteEmoji}>🎬</Text>
+                    <Text style={styles.favoriteEmoji}>Film</Text>
                   </View>
                   <Text style={styles.favoriteText}>Film #{movieId}</Text>
                 </TouchableOpacity>
@@ -128,7 +128,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   onPress={() => navigation.navigate('MovieDetail', { movieId: item.movieId })}
                 >
                   <View style={styles.favoritePoster}>
-                    <Text style={styles.favoriteEmoji}>📋</Text>
+                    <Text style={styles.favoriteEmoji}>Liste</Text>
                   </View>
                   <View style={styles.favoriteInfo}>
                     <Text style={styles.favoriteText}>Film #{item.movieId}</Text>
@@ -163,27 +163,27 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Compte</Text>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuIcon}>👤</Text>
+            <Text style={styles.menuIcon}>Profil</Text>
             <Text style={styles.menuText}>Modifier le profil</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuIcon}>🔔</Text>
+            <Text style={styles.menuIcon}>Notif</Text>
             <Text style={styles.menuText}>Notifications</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuIcon}>🎨</Text>
+            <Text style={styles.menuIcon}>Theme</Text>
             <Text style={styles.menuText}>Thème</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuIcon}>❓</Text>
+            <Text style={styles.menuIcon}>Aide</Text>
             <Text style={styles.menuText}>Aide</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuIcon}>ℹ️</Text>
+            <Text style={styles.menuIcon}>Info</Text>
             <Text style={styles.menuText}>À propos</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>

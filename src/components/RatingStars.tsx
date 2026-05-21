@@ -32,9 +32,11 @@ export const RatingStars: React.FC<RatingStarsProps> = ({
         onPress={() => onRate?.(i * 2)}
         style={styles.starContainer}
       >
-        <Text style={[styles.star, { fontSize: size }, isFilled && styles.starFilled, isHalf && styles.starHalf]}>
-          {isFilled ? '★' : isHalf ? '⯪' : '☆'}
-        </Text>
+        <View style={[styles.starShape, { width: size, height: size }, isFilled && styles.starFilled, isHalf && styles.starHalf]}>
+          <Text style={[styles.starText, { fontSize: size }]}>
+            {isFilled ? '★' : '☆'}
+          </Text>
+        </View>
       </TouchableOpacity>
     );
   }
@@ -60,7 +62,11 @@ const styles = StyleSheet.create({
   starContainer: {
     padding: 2,
   },
-  star: {
+  starShape: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  starText: {
     color: '#666',
   },
   starFilled: {

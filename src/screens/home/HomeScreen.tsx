@@ -31,7 +31,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         style={styles.profileIcon}
         onPress={() => navigation.navigate('Profile')}
       >
-        <Text style={styles.profileText}>👤</Text>
+        <Text style={styles.profileText}>Profil</Text>
       </TouchableOpacity>
     </View>
   );
@@ -61,7 +61,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {DEMO_ANALYSES.map((item) => (
           <TouchableOpacity key={item.id} style={styles.feedCard}>
             <View style={styles.feedImage}>
-              <Text style={styles.feedEmoji}>🎬</Text>
+              <Text style={styles.feedEmoji}>Film</Text>
             </View>
             <View style={styles.feedContent}>
               <View style={styles.feedTag}>
@@ -87,7 +87,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             onPress={() => navigation.navigate('MovieDetail', { movieId: movie.id })}
           >
             <View style={styles.trendPoster}>
-              <Text style={styles.trendEmoji}>🎥</Text>
+              <Text style={styles.trendEmoji}>Vidéo</Text>
             </View>
             <Text style={styles.trendTitle} numberOfLines={1}>{movie.title}</Text>
             <Text style={styles.trendRating}>★ {movie.polarRating}</Text>

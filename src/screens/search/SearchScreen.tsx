@@ -87,7 +87,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
             }}
           >
             <View style={styles.categoryImage}>
-              <Text style={styles.categoryEmoji}>🎬</Text>
+              <Text style={styles.categoryEmoji}>Cat.</Text>
             </View>
             <Text style={styles.categoryName}>{category.name}</Text>
           </TouchableOpacity>
@@ -122,7 +122,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
             onPress={() => navigation.navigate('MovieDetail', { movieId: movie.id })}
           >
             <View style={styles.resultPoster}>
-              <Text style={styles.resultEmoji}>🎥</Text>
+              <Text style={styles.resultEmoji}>Film</Text>
             </View>
             <View style={styles.resultInfo}>
               <Text style={styles.resultTitle}>{movie.title}</Text>
@@ -147,7 +147,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       
       <View style={styles.searchContainer}>
         <View style={styles.searchInputWrapper}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchIcon}>Chercher</Text>
           <TextInput
             style={styles.searchInput}
             placeholder="Rechercher..."
@@ -157,7 +157,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={styles.clearIcon}>✕</Text>
+              <Text style={styles.clearIcon}>Fermer</Text>
             </TouchableOpacity>
           )}
         </View>
