@@ -24,6 +24,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     profile,
     favorites, 
     preferences,
+    watchlist,
+    ratings,
     signOut,
   } = useAuthStore();
 
@@ -77,15 +79,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>
-              {preferences?.favorite_genres?.length || 0}
-            </Text>
-            <Text style={styles.statLabel}>Genres</Text>
+            <Text style={styles.statValue}>{watchlist.length}</Text>
+            <Text style={styles.statLabel}>À voir</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{favorites.length}</Text>
-            <Text style={styles.statLabel}>Analyses</Text>
+            <Text style={styles.statValue}>{ratings.length}</Text>
+            <Text style={styles.statLabel}>Notés</Text>
           </View>
         </View>
 
@@ -107,6 +107,33 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     <Text style={styles.favoriteEmoji}>🎬</Text>
                   </View>
                   <Text style={styles.favoriteText}>Film #{movieId}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ma Watchlist</Text>
+          {watchlist.length === 0 ? (
+            <Text style={styles.emptyText}>
+              Ajoutez des films à votre watchlist pour les retrouver ici
+            </Text>
+          ) : (
+            <View style={styles.favoritesList}>
+              {watchlist.slice(0, 5).map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.favoriteItem}
+                  onPress={() => navigation.navigate('MovieDetail', { movieId: item.movieId })}
+                >
+                  <View style={styles.favoritePoster}>
+                    <Text style={styles.favoriteEmoji}>📋</Text>
+                  </View>
+                  <View style={styles.favoriteInfo}>
+                    <Text style={styles.favoriteText}>Film #{item.movieId}</Text>
+                    <Text style={styles.favoriteStatus}>{item.status}</Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -272,9 +299,17 @@ const styles = StyleSheet.create({
   favoriteEmoji: {
     fontSize: 20,
   },
+  favoriteInfo: {
+    flex: 1,
+  },
   favoriteText: {
     ...typography.body,
     color: colors.text,
+  },
+  favoriteStatus: {
+    ...typography.caption,
+    color: colors.primary,
+    marginTop: 2,
   },
   preferenceItem: {
     flexDirection: 'row',
