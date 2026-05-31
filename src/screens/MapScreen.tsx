@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { locations, movies } from '../data';
+import { locations } from '../data';
+import { useEnrichedMovies } from '../hooks/useEnrichedMovie';
 import { MapPin, Film } from 'lucide-react';
 
 export const MapScreen: React.FC = () => {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
+  const { movies, loading } = useEnrichedMovies(50, 0);
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
@@ -99,66 +101,74 @@ export const MapScreen: React.FC = () => {
           <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink mb-4">
             Lieux
           </h2>
-          <div className="space-y-3">
-            {locations.map((loc) => {
-              const locMovies = movies.filter((m) => m.locations.includes(loc.city));
-              const isActive = activeLocation === loc.id;
-              return (
-                <div
-                  key={loc.id}
-                  className={`p-3 border transition-colors cursor-pointer ${
-                    isActive
-                      ? 'bg-polar-ink text-polar-white border-polar-ink'
-                      : 'bg-polar-surface border-polar-border hover:border-polar-ink-3'
-                  }`}
-                  onClick={() => setActiveLocation(isActive ? null : loc.id)}
-                  role="button"
-                  tabIndex={0}
-                  aria-expanded={isActive}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setActiveLocation(isActive ? null : loc.id);
-                    }
-                  }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <MapPin className={`w-4 h-4 ${isActive ? 'text-polar-white' : 'text-polar-ink-3'}`} aria-hidden="true" />
-                      <div>
-                        <span className={`text-sm font-medium block ${isActive ? 'text-polar-white' : 'text-polar-ink'}`}>
-                          {loc.city}
-                        </span>
-                        <span className={`text-xs ${isActive ? 'text-polar-white/70' : 'text-polar-ink-3'}`}>
-                          {loc.country}
-                        </span>
+          {loading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-20 bg-polar-surface border border-polar-border animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {locations.map((loc) => {
+                const locMovies = movies.filter((m) => m.locations.includes(loc.city));
+                const isActive = activeLocation === loc.id;
+                return (
+                  <div
+                    key={loc.id}
+                    className={`p-3 border transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-polar-ink text-polar-white border-polar-ink'
+                        : 'bg-polar-surface border-polar-border hover:border-polar-ink-3'
+                    }`}
+                    onClick={() => setActiveLocation(isActive ? null : loc.id)}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isActive}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveLocation(isActive ? null : loc.id);
+                      }
+                    }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <MapPin className={`w-4 h-4 ${isActive ? 'text-polar-white' : 'text-polar-ink-3'}`} aria-hidden="true" />
+                        <div>
+                          <span className={`text-sm font-medium block ${isActive ? 'text-polar-white' : 'text-polar-ink'}`}>
+                            {loc.city}
+                          </span>
+                          <span className={`text-xs ${isActive ? 'text-polar-white/70' : 'text-polar-ink-3'}`}>
+                            {loc.country}
+                          </span>
+                        </div>
                       </div>
+                      <span className={`text-xs ${isActive ? 'text-polar-white/70' : 'text-polar-ink-3'}`}>
+                        {locMovies.length} film{locMovies.length > 1 ? 's' : ''}
+                      </span>
                     </div>
-                    <span className={`text-xs ${isActive ? 'text-polar-white/70' : 'text-polar-ink-3'}`}>
-                      {locMovies.length} film{locMovies.length > 1 ? 's' : ''}
-                    </span>
+                    <p className={`text-xs mt-2 ${isActive ? 'text-polar-white/80' : 'text-polar-ink-3'}`}>
+                      {loc.description}
+                    </p>
+                    {isActive && locMovies.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-polar-white/20 space-y-1">
+                        {locMovies.map((m) => (
+                          <Link
+                            key={m.id}
+                            to={`/movie/${m.id}`}
+                            className="flex items-center gap-2 text-xs text-polar-white/90 hover:text-polar-white"
+                          >
+                            <Film className="w-3 h-3" aria-hidden="true" />
+                            {m.title} ({m.year})
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <p className={`text-xs mt-2 ${isActive ? 'text-polar-white/80' : 'text-polar-ink-3'}`}>
-                    {loc.description}
-                  </p>
-                  {isActive && locMovies.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-polar-white/20 space-y-1">
-                      {locMovies.map((m) => (
-                        <Link
-                          key={m.id}
-                          to={`/movie/${m.id}`}
-                          className="flex items-center gap-2 text-xs text-polar-white/90 hover:text-polar-white"
-                        >
-                          <Film className="w-3 h-3" aria-hidden="true" />
-                          {m.title} ({m.year})
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

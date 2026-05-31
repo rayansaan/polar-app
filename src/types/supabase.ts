@@ -314,6 +314,117 @@ export interface Database {
           created_at?: string;
         };
       };
+      tmdb_cache: {
+        Row: {
+          id: string;
+          movie_id: string;
+          tmdb_id: number;
+          backdrop_url: string | null;
+          poster_url: string | null;
+          rating: number | null;
+          vote_count: number | null;
+          tagline: string | null;
+          overview: string | null;
+          runtime: number | null;
+          release_date: string | null;
+          original_language: string | null;
+          origin_country: string[] | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          movie_id: string;
+          tmdb_id: number;
+          backdrop_url?: string | null;
+          poster_url?: string | null;
+          rating?: number | null;
+          vote_count?: number | null;
+          tagline?: string | null;
+          overview?: string | null;
+          runtime?: number | null;
+          release_date?: string | null;
+          original_language?: string | null;
+          origin_country?: string[] | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          movie_id?: string;
+          tmdb_id?: number;
+          backdrop_url?: string | null;
+          poster_url?: string | null;
+          rating?: number | null;
+          vote_count?: number | null;
+          tagline?: string | null;
+          overview?: string | null;
+          runtime?: number | null;
+          release_date?: string | null;
+          original_language?: string | null;
+          origin_country?: string[] | null;
+          updated_at?: string;
+        };
+      };
+      tmdb_cast: {
+        Row: {
+          id: string;
+          movie_id: string;
+          tmdb_person_id: number | null;
+          name: string;
+          character: string | null;
+          profile_path: string | null;
+          order_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          movie_id: string;
+          tmdb_person_id?: number | null;
+          name: string;
+          character?: string | null;
+          profile_path?: string | null;
+          order_index?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          movie_id?: string;
+          tmdb_person_id?: number | null;
+          name?: string;
+          character?: string | null;
+          profile_path?: string | null;
+          order_index?: number;
+          created_at?: string;
+        };
+      };
+      tmdb_similar: {
+        Row: {
+          id: string;
+          movie_id: string;
+          similar_tmdb_id: number;
+          title: string | null;
+          poster_path: string | null;
+          release_year: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          movie_id: string;
+          similar_tmdb_id: number;
+          title?: string | null;
+          poster_path?: string | null;
+          release_year?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          movie_id?: string;
+          similar_tmdb_id?: number;
+          title?: string | null;
+          poster_path?: string | null;
+          release_year?: number | null;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

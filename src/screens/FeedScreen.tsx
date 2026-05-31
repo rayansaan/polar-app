@@ -1,12 +1,14 @@
-import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { movies, articles } from '../data';
+import { useEnrichedMovies } from '../hooks/useEnrichedMovie';
+import { articles } from '../data';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, Film } from 'lucide-react';
 
 export const FeedScreen: React.FC = () => {
-  const heroMovies = movies.slice(0, 5);
+  const [limit, setLimit] = useState(10);
+  const { movies, loading, error } = useEnrichedMovies(limit, 0);
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
@@ -22,33 +24,48 @@ export const FeedScreen: React.FC = () => {
 
       {/* Hero - Mobile horizontal scroll / Desktop grid */}
       <section className="mb-8">
-        <div className="flex lg:grid lg:grid-cols-5 gap-3 px-4 lg:px-8 overflow-x-auto lg:overflow-visible snap-x snap-mandatory pb-2 -mx-4 lg:mx-0 px-4 lg:px-8">
-          {heroMovies.map((movie, idx) => (
-            <Link
-              key={movie.id}
-              to={`/movie/${movie.id}`}
-              className={`relative flex-shrink-0 snap-start group ${idx === 0 ? 'w-[280px] lg:w-auto lg:col-span-2 lg:row-span-2' : 'w-[140px] lg:w-auto'}`}
-            >
-              <div className={`relative overflow-hidden bg-polar-surface border border-polar-border ${idx === 0 ? 'aspect-[3/4] lg:aspect-auto lg:h-full' : 'aspect-[2/3]'}`}>
-                <img
-                  src={movie.posterUrl || movie.heroUrl}
-                  alt={movie.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading={idx < 2 ? 'eager' : 'lazy'}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h3 className={`font-bold text-white leading-tight ${idx === 0 ? 'text-lg lg:text-xl' : 'text-sm'}`}>
-                    {movie.title}
-                  </h3>
-                  <p className="text-white/70 text-xs mt-0.5">
-                    {movie.year} · {movie.director}
-                  </p>
+        {loading ? (
+          <div className="px-4 lg:px-8">
+            <div className="h-64 bg-polar-surface border border-polar-border animate-pulse" />
+          </div>
+        ) : error ? (
+          <div className="px-4 lg:px-8 text-sm text-polar-ink-3">{error}</div>
+        ) : (
+          <div className="flex lg:grid lg:grid-cols-5 gap-3 px-4 lg:px-8 overflow-x-auto lg:overflow-visible snap-x snap-mandatory pb-2 -mx-4 lg:mx-0 px-4 lg:px-8">
+            {movies.slice(0, 5).map((movie, idx) => (
+              <Link
+                key={movie.id}
+                to={`/movie/${movie.id}`}
+                className={`relative flex-shrink-0 snap-start group ${idx === 0 ? 'w-[280px] lg:w-auto lg:col-span-2 lg:row-span-2' : 'w-[140px] lg:w-auto'}`}
+              >
+                <div className={`relative overflow-hidden bg-polar-surface border border-polar-border ${idx === 0 ? 'aspect-[3/4] lg:aspect-auto lg:h-full' : 'aspect-[2/3]'}`}>
+                  {movie.posterUrl ? (
+                    <img
+                      src={movie.posterUrl}
+                      alt={movie.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading={idx < 2 ? 'eager' : 'lazy'}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-polar-surface">
+                      <Film className="w-8 h-8 text-polar-ink-3 mb-2" />
+                      <span className="text-xs text-polar-ink-3">Enrichissement en cours...</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className={`font-bold text-white leading-tight ${idx === 0 ? 'text-lg lg:text-xl' : 'text-sm'}`}>
+                      {movie.title}
+                    </h3>
+                    <p className="text-white/70 text-xs mt-0.5">
+                      {movie.year} · {movie.director}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <Separator className="mx-4 lg:mx-8 bg-polar-border" />
@@ -111,6 +128,18 @@ export const FeedScreen: React.FC = () => {
           ))}
         </div>
       </section>
+
+      {movies.length >= limit && (
+        <div className="px-4 lg:px-8 pb-8">
+          <button
+            type="button"
+            onClick={() => setLimit((prev) => prev + 10)}
+            className="w-full py-3 bg-polar-surface border border-polar-border text-sm font-medium text-polar-ink hover:border-polar-ink-3 transition-colors"
+          >
+            Charger plus
+          </button>
+        </div>
+      )}
     </div>
   );
 };

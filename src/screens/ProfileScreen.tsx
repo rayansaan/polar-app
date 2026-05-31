@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { movies } from '../data';
+import { useEnrichedMovies } from '../hooks/useEnrichedMovie';
 import { useFavorites } from '../hooks/useFavorites';
 import { useGenreStats } from '../hooks/useGenreStats';
 import { Separator } from '../components/ui/separator';
@@ -9,8 +9,9 @@ import { Film, Eye, BookOpen, Heart } from 'lucide-react';
 
 export const ProfileScreen: React.FC = () => {
   const [favorites] = useFavorites();
-  const favMovies = movies.filter((m) => favorites.includes(m.id));
-  const recentlyViewed = movies.slice(0, 8);
+  const { movies: allMovies } = useEnrichedMovies(50, 0);
+  const favMovies = allMovies.filter((m) => favorites.includes(m.id));
+  const recentlyViewed = allMovies.slice(0, 8);
   const genreStats = useGenreStats();
 
   return (
@@ -82,12 +83,18 @@ export const ProfileScreen: React.FC = () => {
           {recentlyViewed.map((m) => (
             <Link key={m.id} to={`/movie/${m.id}`} className="group">
               <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border">
-                <img
-                  src={m.posterUrl}
-                  alt={m.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
+                {m.posterUrl ? (
+                  <img
+                    src={m.posterUrl}
+                    alt={m.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Film className="w-6 h-6 text-polar-ink-3" />
+                  </div>
+                )}
               </div>
               <p className="mt-1.5 text-[10px] text-polar-ink truncate">{m.title}</p>
             </Link>
@@ -110,7 +117,13 @@ export const ProfileScreen: React.FC = () => {
             {favMovies.map((m) => (
               <Link key={m.id} to={`/movie/${m.id}`} className="group flex gap-3 p-2 bg-polar-surface border border-polar-border hover:border-polar-ink-3 transition-colors">
                 <div className="w-12 h-16 shrink-0 overflow-hidden bg-polar-white">
-                  <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" loading="lazy" />
+                  {m.posterUrl ? (
+                    <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Film className="w-4 h-4 text-polar-ink-3" />
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 py-0.5">
                   <p className="text-xs font-medium text-polar-ink truncate">{m.title}</p>

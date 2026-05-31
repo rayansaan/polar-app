@@ -65,7 +65,7 @@ export interface Location {
   country: string;
   x: number;
   y: number;
-  movies: string[];
+  movies?: string[];
   description: string;
 }
 

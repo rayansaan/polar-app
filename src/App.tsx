@@ -7,6 +7,7 @@ import { MapScreen } from './screens/MapScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { MovieDetailScreen } from './screens/MovieDetailScreen';
 import { NotFoundScreen } from './screens/NotFoundScreen';
+import { AdminScreen } from './screens/AdminScreen';
 import { BottomNav } from './components/ui/BottomNav';
 import { Sidebar } from './components/ui/Sidebar';
 import styles from './App.module.css';
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/map" element={<MapScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
               <Route path="/movie/:id" element={<MovieDetailScreen />} />
+              <Route path="/admin" element={<AdminScreen />} />
               <Route path="*" element={<NotFoundScreen />} />
             </Routes>
           </div>

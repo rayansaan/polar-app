@@ -1,11 +1,11 @@
 import { useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { movies } from '../data';
+import { useEnrichedMovie } from '../hooks/useEnrichedMovie';
 import { useFavorites } from '../hooks/useFavorites';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import type { TabType } from '../types';
-import { ArrowLeft, Heart, Clock, Calendar, User, Play, Lightbulb, Award, Tv } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Calendar, User, Play, Lightbulb, Award, Tv, Film } from 'lucide-react';
 
 export const MovieDetailScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,10 +16,9 @@ export const MovieDetailScreen: React.FC = () => {
   const [favorites, toggleFavorite] = useFavorites();
   const [heroCompact, setHeroCompact] = useState(false);
 
-  const movie = movies.find((m) => m.id === id);
+  const { movie, loading } = useEnrichedMovie(id);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Stabiliser le waveform avec useMemo
   const waveformBars = useMemo(() => {
     return movie?.keyScenes.map((scene) => {
       const bars = [];
@@ -30,7 +29,15 @@ export const MovieDetailScreen: React.FC = () => {
       }
       return { scene, bars };
     }) || [];
-  }, [movie?.id]); // Se recalcule seulement quand le film change
+  }, [movie?.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-polar-ink-3">Chargement...</div>
+      </div>
+    );
+  }
 
   if (!movie) {
     return (
@@ -53,6 +60,8 @@ export const MovieDetailScreen: React.FC = () => {
     { id: 'cast', label: 'Casting' },
     { id: 'keyscenes', label: 'Scènes clés' },
   ];
+
+  const hasTmdbCast = movie.cast.length > 0 && movie.tmdbId;
 
   return (
     <div className="min-h-screen animate-fade-in">
@@ -81,19 +90,26 @@ export const MovieDetailScreen: React.FC = () => {
       <div
         ref={contentRef}
         onScroll={handleScroll}
-        className="h-full overflow-y-auto lg:overflow-visible lg:h-auto">
+        className="h-full overflow-y-auto lg:overflow-visible lg:h-auto"
+      >
         <div className="lg:flex lg:gap-8 lg:px-8 lg:py-6">
           {/* Left column - Poster + info */}
           <div className="lg:w-[300px] lg:shrink-0">
             {/* Mobile hero */}
             <div className="lg:hidden relative">
               <div className={`relative transition-all duration-500 ${heroCompact ? 'h-48' : 'h-[50vh]'}`}>
-                <img
-                  src={movie.heroUrl}
-                  alt={movie.title}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
+                {movie.heroUrl ? (
+                  <img
+                    src={movie.heroUrl}
+                    alt={movie.title}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-polar-surface flex items-center justify-center">
+                    <Film className="w-12 h-12 text-polar-ink-3" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-polar-bg via-transparent to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
@@ -108,7 +124,13 @@ export const MovieDetailScreen: React.FC = () => {
             {/* Desktop poster + info */}
             <div className="hidden lg:block sticky top-6">
               <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border mb-4">
-                <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" loading="eager" />
+                {movie.posterUrl ? (
+                  <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" loading="eager" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Film className="w-12 h-12 text-polar-ink-3" />
+                  </div>
+                )}
               </div>
               <Button
                 variant={isFav ? 'accent' : 'secondary'}
@@ -174,7 +196,14 @@ export const MovieDetailScreen: React.FC = () => {
             <div className="px-4 lg:px-0 py-6">
               {activeTab === 'about' && (
                 <div className="space-y-6">
-                  <p className="text-sm leading-relaxed text-polar-ink-2">{movie.synopsis}</p>
+                  {movie.synopsis ? (
+                    <p className="text-sm leading-relaxed text-polar-ink-2">{movie.synopsis}</p>
+                  ) : (
+                    <div className="p-4 bg-polar-surface border border-polar-border text-center">
+                      <Film className="w-8 h-8 mx-auto mb-2 text-polar-ink-3" />
+                      <p className="text-sm text-polar-ink-3">Synopsis disponible après enrichissement TMDB</p>
+                    </div>
+                  )}
 
                   <div className="flex gap-4 p-4 bg-polar-surface border border-polar-border">
                     <img
@@ -232,19 +261,34 @@ export const MovieDetailScreen: React.FC = () => {
               )}
 
               {activeTab === 'cast' && (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {movie.cast.map((actor) => (
-                    <div key={actor.id} className="bg-polar-surface border border-polar-border p-3 text-center">
-                      <img
-                        src={actor.photoUrl}
-                        alt={actor.name}
-                        className="w-16 h-16 rounded-full object-cover mx-auto mb-2"
-                        loading="lazy"
-                      />
-                      <span className="text-sm font-medium text-polar-ink block">{actor.name}</span>
-                      <span className="text-xs text-polar-ink-3">{actor.role}</span>
+                <div>
+                  {hasTmdbCast ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                      {movie.cast.map((actor) => (
+                        <div key={actor.id} className="bg-polar-surface border border-polar-border p-3 text-center">
+                          {actor.photoUrl ? (
+                            <img
+                              src={actor.photoUrl}
+                              alt={actor.name}
+                              className="w-16 h-16 rounded-full object-cover mx-auto mb-2"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-polar-white mx-auto mb-2 flex items-center justify-center">
+                              <User className="w-6 h-6 text-polar-ink-3" />
+                            </div>
+                          )}
+                          <span className="text-sm font-medium text-polar-ink block">{actor.name}</span>
+                          <span className="text-xs text-polar-ink-3">{actor.role}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <div className="p-8 bg-polar-surface border border-polar-border text-center">
+                      <User className="w-8 h-8 mx-auto mb-2 text-polar-ink-3" />
+                      <p className="text-sm text-polar-ink-3">Casting disponible après enrichissement TMDB</p>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { movies } from '../data';
+import { useEnrichedMovies } from '../hooks/useEnrichedMovie';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Search, X, TrendingUp, Clock } from 'lucide-react';
+import { Search, X, TrendingUp, Clock, Film } from 'lucide-react';
 
 type ContentType = 'all' | 'film' | 'series';
 
@@ -17,11 +17,12 @@ const filters: { value: ContentType; label: string }[] = [
 export const SearchScreen: React.FC = () => {
   const [query, setQuery] = useState('');
   const [type, setType] = useState<ContentType>('all');
+  const { movies: allMovies, loading } = useEnrichedMovies(50, 0);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return movies.filter((m) => {
+    return allMovies.filter((m) => {
       const matchesType = type === 'all' || m.type === type;
       const matchesQuery =
         m.title.toLowerCase().includes(q) ||
@@ -29,11 +30,12 @@ export const SearchScreen: React.FC = () => {
         m.genre.some((g) => g.toLowerCase().includes(q));
       return matchesType && matchesQuery;
     });
-  }, [query, type]);
+  }, [query, type, allMovies]);
 
   const isSearchActive = query.trim().length > 0;
-  const newest = useMemo(() => movies.slice(0, 6), []);
-  const popular = useMemo(() => [...movies].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 6), []);
+
+  const newest = useMemo(() => allMovies.slice(0, 6), [allMovies]);
+  const popular = useMemo(() => [...allMovies].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 6), [allMovies]);
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
@@ -83,7 +85,13 @@ export const SearchScreen: React.FC = () => {
       </div>
 
       <div className="px-4 lg:px-8">
-        {!isSearchActive ? (
+        {loading ? (
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-polar-surface border border-polar-border animate-pulse" />
+            ))}
+          </div>
+        ) : !isSearchActive ? (
           <div className="space-y-8">
             <section>
               <div className="flex items-center gap-2 mb-4">
@@ -94,12 +102,18 @@ export const SearchScreen: React.FC = () => {
                 {newest.map((m) => (
                   <Link key={m.id} to={`/movie/${m.id}`} className="group">
                     <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border">
-                      <img
-                        src={m.posterUrl}
-                        alt={m.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                      {m.posterUrl ? (
+                        <img
+                          src={m.posterUrl}
+                          alt={m.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Film className="w-8 h-8 text-polar-ink-3" />
+                        </div>
+                      )}
                     </div>
                     <p className="mt-2 text-xs font-medium text-polar-ink truncate">{m.title}</p>
                     <p className="text-[10px] text-polar-ink-3">{m.year}</p>
@@ -119,12 +133,18 @@ export const SearchScreen: React.FC = () => {
                 {popular.map((m) => (
                   <Link key={m.id} to={`/movie/${m.id}`} className="group">
                     <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border">
-                      <img
-                        src={m.posterUrl}
-                        alt={m.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                      {m.posterUrl ? (
+                        <img
+                          src={m.posterUrl}
+                          alt={m.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Film className="w-8 h-8 text-polar-ink-3" />
+                        </div>
+                      )}
                     </div>
                     <p className="mt-2 text-xs font-medium text-polar-ink truncate">{m.title}</p>
                     <p className="text-[10px] text-polar-ink-3">{m.year}</p>
@@ -142,12 +162,18 @@ export const SearchScreen: React.FC = () => {
               {results.map((m) => (
                 <Link key={m.id} to={`/movie/${m.id}`} className="group">
                   <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border">
-                    <img
-                      src={m.posterUrl}
-                      alt={m.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                    {m.posterUrl ? (
+                      <img
+                        src={m.posterUrl}
+                        alt={m.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Film className="w-8 h-8 text-polar-ink-3" />
+                      </div>
+                    )}
                   </div>
                   <div className="mt-2">
                     <p className="text-sm font-medium text-polar-ink truncate">{m.title}</p>
