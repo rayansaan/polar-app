@@ -34,6 +34,7 @@ export const FeedScreen: React.FC = () => {
                   src={movie.posterUrl || movie.heroUrl}
                   alt={movie.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading={idx < 2 ? 'eager' : 'lazy'}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -61,10 +62,13 @@ export const FeedScreen: React.FC = () => {
               Plongées critiques et décryptages
             </p>
           </div>
-          <button className="text-xs font-medium text-polar-ink-2 hover:text-polar-ink flex items-center gap-1 transition-colors">
+          <Link
+            to="/search"
+            className="text-xs font-medium text-polar-ink-2 hover:text-polar-ink flex items-center gap-1 transition-colors"
+          >
             Tout voir
-            <ArrowRight className="w-3 h-3" />
-          </button>
+            <ArrowRight className="w-3 h-3" aria-hidden="true" />
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -78,6 +82,7 @@ export const FeedScreen: React.FC = () => {
                   src={article.imageUrl}
                   alt={article.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
                 />
               </div>
               <div className="flex-1 min-w-0 py-0.5">
@@ -96,7 +101,7 @@ export const FeedScreen: React.FC = () => {
                 </p>
                 <div className="flex items-center gap-3 mt-2.5 text-[10px] text-polar-ink-3 uppercase tracking-wider">
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="w-3 h-3" aria-hidden="true" />
                     {article.readTime} min
                   </span>
                   <span>{article.category}</span>

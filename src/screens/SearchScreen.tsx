@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { movies } from '../data';
 import { Input } from '../components/ui/input';
@@ -32,8 +32,8 @@ export const SearchScreen: React.FC = () => {
   }, [query, type]);
 
   const isSearchActive = query.trim().length > 0;
-  const newest = movies.slice(0, 6);
-  const popular = [...movies].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 6);
+  const newest = useMemo(() => movies.slice(0, 6), []);
+  const popular = useMemo(() => [...movies].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 6), []);
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
@@ -45,7 +45,7 @@ export const SearchScreen: React.FC = () => {
 
       <div className="px-4 lg:px-8 mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-polar-ink-3" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-polar-ink-3" aria-hidden="true" />
           <Input
             type="text"
             placeholder="Films, réalisateurs, genres..."
@@ -55,10 +55,11 @@ export const SearchScreen: React.FC = () => {
           />
           {query && (
             <button
+              type="button"
               onClick={() => setQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-polar-ink-3 hover:text-polar-ink"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -67,6 +68,7 @@ export const SearchScreen: React.FC = () => {
           {filters.map((f) => (
             <button
               key={f.value}
+              type="button"
               onClick={() => setType(f.value)}
               className={`px-4 py-1.5 text-xs font-medium uppercase tracking-wider border transition-colors ${
                 type === f.value
@@ -85,7 +87,7 @@ export const SearchScreen: React.FC = () => {
           <div className="space-y-8">
             <section>
               <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-polar-ink-3" />
+                <Clock className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink">Nouveautés</h2>
               </div>
               <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
@@ -96,6 +98,7 @@ export const SearchScreen: React.FC = () => {
                         src={m.posterUrl}
                         alt={m.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-polar-ink truncate">{m.title}</p>
@@ -109,7 +112,7 @@ export const SearchScreen: React.FC = () => {
 
             <section>
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-4 h-4 text-polar-ink-3" />
+                <TrendingUp className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink">Populaires</h2>
               </div>
               <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
@@ -120,6 +123,7 @@ export const SearchScreen: React.FC = () => {
                         src={m.posterUrl}
                         alt={m.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-polar-ink truncate">{m.title}</p>
@@ -142,6 +146,7 @@ export const SearchScreen: React.FC = () => {
                       src={m.posterUrl}
                       alt={m.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
                     />
                   </div>
                   <div className="mt-2">

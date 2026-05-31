@@ -26,7 +26,7 @@ export const BottomNav: React.FC = () => {
               isActive ? "text-polar-ink" : "text-polar-ink-3"
             )}
           >
-            <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} />
+            <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} aria-hidden="true" />
             <span className="text-[9px] uppercase tracking-wider font-medium">{item.label}</span>
           </NavLink>
         );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { locations, movies } from '../data';
 import { MapPin, Film } from 'lucide-react';
@@ -54,9 +54,15 @@ export const MapScreen: React.FC = () => {
                     stroke="#312117"
                     strokeWidth="0.4"
                     className="cursor-pointer transition-colors hover:fill-polar-pink"
-                    onClick={() => {
-                      setActiveLocation(loc.id);
-                      setTimeout(() => setActiveLocation(null), 3000);
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Voir les films tournés à ${loc.city}`}
+                    onClick={() => setActiveLocation(loc.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveLocation(loc.id);
+                      }
                     }}
                   />
                   {activeLocation === loc.id && (
@@ -106,10 +112,19 @@ export const MapScreen: React.FC = () => {
                       : 'bg-polar-surface border-polar-border hover:border-polar-ink-3'
                   }`}
                   onClick={() => setActiveLocation(isActive ? null : loc.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isActive}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveLocation(isActive ? null : loc.id);
+                    }
+                  }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className={`w-4 h-4 ${isActive ? 'text-polar-white' : 'text-polar-ink-3'}`} />
+                      <MapPin className={`w-4 h-4 ${isActive ? 'text-polar-white' : 'text-polar-ink-3'}`} aria-hidden="true" />
                       <div>
                         <span className={`text-sm font-medium block ${isActive ? 'text-polar-white' : 'text-polar-ink'}`}>
                           {loc.city}
@@ -134,7 +149,7 @@ export const MapScreen: React.FC = () => {
                           to={`/movie/${m.id}`}
                           className="flex items-center gap-2 text-xs text-polar-white/90 hover:text-polar-white"
                         >
-                          <Film className="w-3 h-3" />
+                          <Film className="w-3 h-3" aria-hidden="true" />
                           {m.title} ({m.year})
                         </Link>
                       ))}

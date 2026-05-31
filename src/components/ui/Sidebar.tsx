@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
     <aside className="hidden lg:flex flex-col w-[220px] fixed left-0 top-0 h-screen bg-polar-surface border-r border-polar-border z-50">
       <div className="p-6">
         <NavLink to="/feed" className="flex items-center gap-2 text-polar-ink">
-          <Film className="w-5 h-5" />
+          <Film className="w-5 h-5" aria-hidden="true" />
           <span className="text-lg font-bold tracking-tight">PōLAR</span>
         </NavLink>
       </div>
@@ -37,7 +37,7 @@ export const Sidebar: React.FC = () => {
                       : "text-polar-ink-2 hover:bg-polar-white hover:text-polar-ink"
                   )}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4" aria-hidden="true" />
                   {item.label}
                 </NavLink>
               </li>

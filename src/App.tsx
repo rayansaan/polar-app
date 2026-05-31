@@ -6,6 +6,7 @@ import { SearchScreen } from './screens/SearchScreen';
 import { MapScreen } from './screens/MapScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { MovieDetailScreen } from './screens/MovieDetailScreen';
+import { NotFoundScreen } from './screens/NotFoundScreen';
 import { BottomNav } from './components/ui/BottomNav';
 import { Sidebar } from './components/ui/Sidebar';
 import styles from './App.module.css';
@@ -29,14 +30,13 @@ export default function App() {
               <Route path="/search" element={<SearchScreen />} />
               <Route path="/map" element={<MapScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
+              <Route path="/movie/:id" element={<MovieDetailScreen />} />
+              <Route path="*" element={<NotFoundScreen />} />
             </Routes>
           </div>
           {!isMovieDetail && <BottomNav />}
         </>
       )}
-      <Routes>
-        <Route path="/movie/:id" element={<MovieDetailScreen />} />
-      </Routes>
     </div>
   );
 }

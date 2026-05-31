@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { movies } from '../data';
 import { useFavorites } from '../hooks/useFavorites';
@@ -19,6 +19,19 @@ export const MovieDetailScreen: React.FC = () => {
   const movie = movies.find((m) => m.id === id);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // Stabiliser le waveform avec useMemo
+  const waveformBars = useMemo(() => {
+    return movie?.keyScenes.map((scene) => {
+      const bars = [];
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const height = Math.max(4, (scene.intensity / 100) * 40 * (0.5 + Math.random() * 0.5));
+        bars.push(height);
+      }
+      return { scene, bars };
+    }) || [];
+  }, [movie?.id]); // Se recalcule seulement quand le film change
+
   if (!movie) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -35,16 +48,6 @@ export const MovieDetailScreen: React.FC = () => {
     }
   };
 
-  const waveformBars = movie.keyScenes.map((scene) => {
-    const bars = [];
-    const count = 20;
-    for (let i = 0; i < count; i++) {
-      const height = Math.max(4, (scene.intensity / 100) * 40 * (0.5 + Math.random() * 0.5));
-      bars.push(height);
-    }
-    return { scene, bars };
-  });
-
   const tabs: { id: TabType; label: string }[] = [
     { id: 'about', label: 'Résumé' },
     { id: 'cast', label: 'Casting' },
@@ -52,16 +55,18 @@ export const MovieDetailScreen: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-polar-bg animate-fade-in lg:static lg:z-auto lg:bg-transparent">
+    <div className="min-h-screen animate-fade-in">
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4 h-14">
         <button
+          type="button"
           onClick={() => navigate(-1)}
           className="w-9 h-9 flex items-center justify-center bg-polar-surface/80 backdrop-blur border border-polar-border"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         </button>
         <button
+          type="button"
           onClick={() => toggleFavorite(movie.id)}
           className={`w-9 h-9 flex items-center justify-center border transition-colors ${
             isFav
@@ -69,7 +74,7 @@ export const MovieDetailScreen: React.FC = () => {
               : 'bg-polar-surface/80 backdrop-blur border-polar-border'
           }`}
         >
-          <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -87,14 +92,15 @@ export const MovieDetailScreen: React.FC = () => {
                   src={movie.heroUrl}
                   alt={movie.title}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-polar-bg via-transparent to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
                 <h1 className="text-2xl font-bold text-white drop-shadow-lg">{movie.title}</h1>
                 <div className="flex items-center gap-3 mt-1 text-white/80 text-sm">
-                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{movie.year}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{movie.duration}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" aria-hidden="true" />{movie.year}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" aria-hidden="true" />{movie.duration}</span>
                 </div>
               </div>
             </div>
@@ -102,27 +108,27 @@ export const MovieDetailScreen: React.FC = () => {
             {/* Desktop poster + info */}
             <div className="hidden lg:block sticky top-6">
               <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border mb-4">
-                <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
+                <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" loading="eager" />
               </div>
               <Button
                 variant={isFav ? 'accent' : 'secondary'}
                 className="w-full mb-4"
                 onClick={() => toggleFavorite(movie.id)}
               >
-                <Heart className={`w-4 h-4 mr-2 ${isFav ? 'fill-current' : ''}`} />
+                <Heart className={`w-4 h-4 mr-2 ${isFav ? 'fill-current' : ''}`} aria-hidden="true" />
                 {isFav ? 'Dans vos favoris' : 'Ajouter aux favoris'}
               </Button>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs text-polar-ink-3">
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
                   {movie.year}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-polar-ink-3">
-                  <Clock className="w-3.5 h-3.5" />
+                  <Clock className="w-3.5 h-3.5" aria-hidden="true" />
                   {movie.duration}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-polar-ink-3">
-                  <User className="w-3.5 h-3.5" />
+                  <User className="w-3.5 h-3.5" aria-hidden="true" />
                   {movie.director}
                 </div>
               </div>
@@ -142,10 +148,13 @@ export const MovieDetailScreen: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-polar-border mt-4 lg:mt-0 px-4 lg:px-0">
+            <div className="flex border-b border-polar-border mt-4 lg:mt-0 px-4 lg:px-0" role="tablist">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
                   onClick={() => {
                     setActiveTab(tab.id);
                     setOpenHotspot(null);
@@ -172,6 +181,7 @@ export const MovieDetailScreen: React.FC = () => {
                       src={movie.directorPhoto}
                       alt={movie.director}
                       className="w-14 h-14 rounded-full object-cover shrink-0"
+                      loading="lazy"
                     />
                     <div>
                       <span className="text-sm font-semibold text-polar-ink">{movie.director}</span>
@@ -181,7 +191,7 @@ export const MovieDetailScreen: React.FC = () => {
 
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Lightbulb className="w-4 h-4 text-polar-ink-3" />
+                      <Lightbulb className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                       <h3 className="text-xs font-bold uppercase tracking-wider text-polar-ink">Anecdote</h3>
                     </div>
                     <p className="text-sm text-polar-ink-2 leading-relaxed">{movie.anecdote}</p>
@@ -189,7 +199,7 @@ export const MovieDetailScreen: React.FC = () => {
 
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Play className="w-4 h-4 text-polar-ink-3" />
+                      <Play className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                       <h3 className="text-xs font-bold uppercase tracking-wider text-polar-ink">Inspiration</h3>
                     </div>
                     <p className="text-sm text-polar-ink-2 leading-relaxed">{movie.inspiration}</p>
@@ -197,7 +207,7 @@ export const MovieDetailScreen: React.FC = () => {
 
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Award className="w-4 h-4 text-polar-ink-3" />
+                      <Award className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                       <h3 className="text-xs font-bold uppercase tracking-wider text-polar-ink">Nominations</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -209,7 +219,7 @@ export const MovieDetailScreen: React.FC = () => {
 
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Tv className="w-4 h-4 text-polar-ink-3" />
+                      <Tv className="w-4 h-4 text-polar-ink-3" aria-hidden="true" />
                       <h3 className="text-xs font-bold uppercase tracking-wider text-polar-ink">Plateformes</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -229,6 +239,7 @@ export const MovieDetailScreen: React.FC = () => {
                         src={actor.photoUrl}
                         alt={actor.name}
                         className="w-16 h-16 rounded-full object-cover mx-auto mb-2"
+                        loading="lazy"
                       />
                       <span className="text-sm font-medium text-polar-ink block">{actor.name}</span>
                       <span className="text-xs text-polar-ink-3">{actor.role}</span>
@@ -243,6 +254,7 @@ export const MovieDetailScreen: React.FC = () => {
                     {movie.keyScenes.map((scene, idx) => (
                       <button
                         key={scene.id}
+                        type="button"
                         onClick={() => {
                           setActiveScene(idx);
                           setOpenHotspot(null);
@@ -257,6 +269,7 @@ export const MovieDetailScreen: React.FC = () => {
                           src={scene.thumbnailUrl}
                           alt={scene.title}
                           className="w-full aspect-video object-cover"
+                          loading="lazy"
                         />
                         <div className="p-2">
                           <span className="text-[10px] text-polar-ink-3 uppercase tracking-wider">{scene.timestamp}</span>
@@ -297,10 +310,12 @@ export const MovieDetailScreen: React.FC = () => {
                         className="border border-polar-border bg-polar-surface overflow-hidden"
                       >
                         <button
+                          type="button"
                           onClick={() =>
                             setOpenHotspot(openHotspot === hotspot.id ? null : hotspot.id)
                           }
                           className="w-full flex items-center justify-between p-3 text-left"
+                          aria-expanded={openHotspot === hotspot.id}
                         >
                           <div className="flex items-center gap-3">
                             <Badge variant="outline" className="text-[9px]">{hotspot.type}</Badge>
