@@ -1,0 +1,144 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-xl);
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.cornerTopLeft,
+.cornerTopRight,
+.cornerBottomLeft,
+.cornerBottomRight {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(49, 33, 23, 0.28);
+  pointer-events: none;
+}
+
+.cornerTopLeft {
+  top: var(--space-lg);
+  left: var(--space-lg);
+  border-right: none;
+  border-bottom: none;
+  border-radius: 20px 0 0 0;
+}
+
+.cornerTopRight {
+  top: var(--space-lg);
+  right: var(--space-lg);
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 20px 0 0;
+}
+
+.cornerBottomLeft {
+  bottom: var(--space-lg);
+  left: var(--space-lg);
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 20px;
+}
+
+.cornerBottomRight {
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 20px 0;
+}
+
+.carousel {
+  position: relative;
+  width: 280px;
+  height: 380px;
+  perspective: 1000px;
+  margin-bottom: var(--space-2xl);
+}
+
+.card {
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  top: 50%;
+  left: 50%;
+  margin-top: -150px;
+  margin-left: -100px;
+  transition: all var(--transition-layout);
+}
+
+.center {
+  background: linear-gradient(135deg, #5a4535 0%, #312117 100%);
+  z-index: 3;
+  box-shadow: 0 20px 40px rgba(49, 33, 23, 0.3);
+}
+
+.sideLeft {
+  transform: translateX(-80px) rotateY(25deg) scale(0.85);
+  filter: grayscale(1) brightness(0.75);
+  z-index: 2;
+  opacity: 0.7;
+}
+
+.sideRight {
+  transform: translateX(80px) rotateY(-25deg) scale(0.85);
+  filter: grayscale(1) brightness(0.75);
+  z-index: 2;
+  opacity: 0.7;
+}
+
+.content {
+  text-align: center;
+  z-index: 10;
+}
+
+.logo {
+  font-family: var(--font-editorial);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: var(--space-sm);
+}
+
+.tagline {
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-bottom: var(--space-xl);
+}
+
+.button {
+  background: var(--ink);
+  color: var(--white);
+  padding: var(--space-md) var(--space-2xl);
+  font-family: var(--font-technical);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-layout);
+}
+
+.button:hover {
+  opacity: 0.85;
+}

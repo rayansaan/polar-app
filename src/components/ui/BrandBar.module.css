@@ -1,0 +1,49 @@
+.brandBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  background: rgba(49, 33, 23, 0.09);
+  border-top: 1px solid rgba(49, 33, 23, 0.14);
+  border-bottom: 1px solid rgba(49, 33, 23, 0.14);
+  padding: 0 var(--space-md);
+}
+
+.cross {
+  font-family: var(--font-technical);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-3);
+  line-height: 1;
+}
+
+.line {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.line::before {
+  content: '';
+  position: absolute;
+  left: var(--space-sm);
+  right: var(--space-sm);
+  top: 50%;
+  height: 1px;
+  background: rgba(49, 33, 23, 0.14);
+}
+
+.text {
+  position: relative;
+  z-index: 1;
+  background: rgba(49, 33, 23, 0.09);
+  padding: 0 var(--space-sm);
+  font-family: var(--font-technical);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+}

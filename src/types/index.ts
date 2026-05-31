@@ -1,132 +1,73 @@
-export type Genre = 
-  | 'Thriller'
-  | 'Polar'
-  | 'Noir'
-  | 'Psychologique'
-  | 'Action'
-  | 'Drama'
-  | 'Espionnage'
-  | 'Néo-noir'
-  | 'Crime'
-  | 'Mystère'
-  | 'Horror'
-  | 'Sci-Fi'
-  | 'Romance'
-  | 'Fantasy'
-  | 'Comedy'
-  | 'War'
-  | 'Biopic'
-  | 'Supernatural'
-  | 'Romance';
-
-export interface CastMember {
+export interface Actor {
   id: string;
   name: string;
-  character: string;
-  avatar?: number;
-}
-
-export interface StreamingPlatform {
-  name: string;
-  logo: number;
-  url: string;
+  role: string;
+  photoUrl: string;
 }
 
 export interface Hotspot {
   id: string;
-  x: number;
-  y: number;
-  title: string;
-  annotation: string;
-}
-
-export interface Scene {
-  id: string;
-  timestamp: number;
-  image: number;
+  type: 'mise-en-scene' | 'lumiere' | 'son' | 'montage' | 'costume' | 'acting';
   title: string;
   description: string;
+  timestamp: string;
+}
+
+export interface KeyScene {
+  id: string;
+  title: string;
+  timestamp: string;
+  duration: string;
+  intensity: number;
+  thumbnailUrl: string;
   hotspots: Hotspot[];
 }
 
 export interface Movie {
   id: string;
   title: string;
-  originalTitle: string;
+  originalTitle?: string;
   year: number;
-  duration: number;
-  synopsis: string;
-  poster: number;
-  backdrop: number;
-  genres: Genre[];
   director: string;
   writers: string[];
-  cast: CastMember[];
-  imdbRating: number;
-  polarRating: number;
-  streaming?: StreamingPlatform[];
-  scenes: Scene[];
-  keywords: string[];
+  duration: string;
+  genre: string[];
+  synopsis: string;
+  directorBio: string;
+  directorPhoto: string;
+  anecdote: string;
+  inspiration: string;
+  nominations: string[];
+  platforms: string[];
+  posterUrl: string;
+  heroUrl: string;
+  cast: Actor[];
+  keyScenes: KeyScene[];
+  locations: string[];
+  type: 'film' | 'series';
+  popularity: number;
 }
 
-export interface User {
+export interface Article {
   id: string;
-  email: string;
-  displayName: string;
-  avatar?: string;
-  createdAt: Date;
+  title: string;
+  subtitle: string;
+  category: 'analysis' | 'news' | 'interview' | 'review';
+  readTime: number;
+  imageUrl: string;
+  tags: string[];
+  date: string;
 }
 
-export interface Favorite {
-  movieId: string;
-  addedAt: Date;
-  notes?: string;
-}
-
-export interface Annotation {
+export interface Location {
   id: string;
-  sceneId: string;
-  movieId: string;
-  content: string;
-  hotspots: Hotspot[];
-  createdAt: Date;
+  city: string;
+  country: string;
+  x: number;
+  y: number;
+  movies: string[];
+  description: string;
 }
 
-export interface UserPreferences {
-  favoriteGenres: Genre[];
-  favoriteDirectors: string[];
-}
-
-export type WatchlistStatus = 'à_voir' | 'vu' | 'en_cours';
-
-export interface WatchlistItem {
-  id: string;
-  movieId: string;
-  status: WatchlistStatus;
-  priority: number;
-  addedAt: Date;
-  notes?: string;
-}
-
-export interface UserRating {
-  id: string;
-  movieId: string;
-  rating: number;
-  review?: string;
-  createdAt: Date;
-}
-
-export type FilterType = 'films' | 'series' | 'directors' | 'writers' | 'actors';
-
-export interface GraphNode {
-  id: string;
-  type: 'movie' | 'person' | 'genre';
-  label: string;
-  image?: number;
-}
-
-export interface GraphEdge {
-  source: string;
-  target: string;
-  label?: string;
-}
+export type TabType = 'about' | 'cast' | 'keyscenes';
+export type BrowseCategory = 'newest' | 'popular' | 'interviews';
