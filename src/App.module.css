@@ -1,21 +1,20 @@
 .app {
   min-height: 100vh;
-  background: var(--bg);
+  background: #e5e2dc;
   display: flex;
   flex-direction: column;
-  max-width: 480px;
-  margin: 0 auto;
   width: 100%;
   position: relative;
 }
 
 .content {
   flex: 1;
-  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
 }
 
-@media (min-width: 481px) {
-  body {
-    background: #d5d2cc;
+@media (min-width: 1024px) {
+  .content {
+    padding-bottom: 0;
+    padding-left: 220px;
   }
 }

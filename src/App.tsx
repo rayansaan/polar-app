@@ -7,6 +7,7 @@ import { MapScreen } from './screens/MapScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { MovieDetailScreen } from './screens/MovieDetailScreen';
 import { BottomNav } from './components/ui/BottomNav';
+import { Sidebar } from './components/ui/Sidebar';
 import styles from './App.module.css';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <OnboardingScreen onComplete={completeOnboarding} />
       ) : (
         <>
+          <Sidebar />
           <div className={styles.content}>
             <Routes>
               <Route path="/" element={<FeedScreen />} />

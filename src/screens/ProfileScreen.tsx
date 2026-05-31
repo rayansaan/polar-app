@@ -1,79 +1,129 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { movies } from '../data';
 import { useFavorites } from '../hooks/useFavorites';
-import { BrandBar } from '../components/ui/BrandBar';
-import styles from './ProfileScreen.module.css';
+import { Separator } from '../components/ui/separator';
+import { Badge } from '../components/ui/badge';
+import { Film, Eye, BookOpen, Heart } from 'lucide-react';
 
 export const ProfileScreen: React.FC = () => {
   const [favorites] = useFavorites();
   const favMovies = movies.filter((m) => favorites.includes(m.id));
-  const recentlyViewed = movies.slice(0, 4);
+  const recentlyViewed = movies.slice(0, 8);
+
+  const genres = ['Science-Fiction', 'Thriller', 'Drame', 'Aventure'];
 
   return (
-    <div className={styles.screen}>
-      <div className={styles.header}>
-        <BrandBar label="PROFIL" />
+    <div className="min-h-screen pb-20 lg:pb-0">
+      {/* Header profil */}
+      <header className="px-4 lg:px-8 pt-6 pb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-polar-ink flex items-center justify-center text-polar-white text-xl font-bold">
+            P
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-polar-ink">Profil</h1>
+            <p className="text-sm text-polar-ink-3">Analyste cinéphile</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Stats */}
+      <div className="px-4 lg:px-8 mb-6">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-polar-surface border border-polar-border p-4 text-center">
+            <Eye className="w-5 h-5 mx-auto mb-2 text-polar-ink-3" />
+            <span className="block text-2xl font-bold text-polar-ink">{favorites.length}</span>
+            <span className="text-[10px] uppercase tracking-wider text-polar-ink-3">Films vus</span>
+          </div>
+          <div className="bg-polar-surface border border-polar-border p-4 text-center">
+            <BookOpen className="w-5 h-5 mx-auto mb-2 text-polar-ink-3" />
+            <span className="block text-2xl font-bold text-polar-ink">12</span>
+            <span className="text-[10px] uppercase tracking-wider text-polar-ink-3">Analyses</span>
+          </div>
+          <div className="bg-polar-surface border border-polar-border p-4 text-center">
+            <Film className="w-5 h-5 mx-auto mb-2 text-polar-ink-3" />
+            <span className="block text-2xl font-bold text-polar-ink">4</span>
+            <span className="text-[10px] uppercase tracking-wider text-polar-ink-3">Listes</span>
+          </div>
+        </div>
       </div>
 
-      <div className={styles.stats}>
-        <div className={styles.statCard}>
-          <span className={styles.statValue}>{favorites.length}</span>
-          <span className={styles.statLabel}>FILMS VUS</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statValue}>12</span>
-          <span className={styles.statLabel}>ANALYSES</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statValue}>4</span>
-          <span className={styles.statLabel}>THÉORIES</span>
-        </div>
-      </div>
+      <Separator className="mx-4 lg:mx-8 bg-polar-border" />
 
-      <div className={styles.section}>
-        <BrandBar label="GENRES FAVORIS" />
-        <div className={styles.genres}>
-          {['Science-Fiction', 'Thriller', 'Drame', 'Aventure'].map((genre) => (
-            <div key={genre} className={styles.genre}>
-              <span className={styles.genreName}>{genre}</span>
-              <div className={styles.genreBar}>
+      {/* Genres favoris */}
+      <section className="px-4 lg:px-8 py-6">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink mb-4">
+          Genres favoris
+        </h2>
+        <div className="space-y-3">
+          {genres.map((genre) => (
+            <div key={genre} className="flex items-center gap-3">
+              <span className="text-xs text-polar-ink-2 w-28 shrink-0">{genre}</span>
+              <div className="flex-1 h-2 bg-polar-white border border-polar-border">
                 <div
-                  className={styles.genreFill}
+                  className="h-full bg-polar-ink transition-all duration-1000"
                   style={{ width: `${Math.floor(Math.random() * 60 + 40)}%` }}
                 />
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className={styles.section}>
-        <BrandBar label="RÉCEMMENT CONSULTÉS" />
-        <div className={styles.historyGrid}>
+      <Separator className="mx-4 lg:mx-8 bg-polar-border" />
+
+      {/* Récemment consultés */}
+      <section className="px-4 lg:px-8 py-6">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink mb-4">
+          Récemment consultés
+        </h2>
+        <div className="grid grid-cols-4 lg:grid-cols-8 gap-2">
           {recentlyViewed.map((m) => (
-            <div key={m.id} className={styles.historyItem}>
-              <img src={m.posterUrl} alt={m.title} className={styles.historyThumb} />
-              <span className={styles.historyTitle}>{m.title}</span>
-            </div>
+            <Link key={m.id} to={`/movie/${m.id}`} className="group">
+              <div className="aspect-[2/3] overflow-hidden bg-polar-surface border border-polar-border">
+                <img
+                  src={m.posterUrl}
+                  alt={m.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <p className="mt-1.5 text-[10px] text-polar-ink truncate">{m.title}</p>
+            </Link>
           ))}
         </div>
-      </div>
+      </section>
 
+      <Separator className="mx-4 lg:mx-8 bg-polar-border" />
+
+      {/* Favoris */}
       {favMovies.length > 0 && (
-        <div className={styles.section}>
-          <BrandBar label="FAVORIS" />
-          <div className={styles.favList}>
+        <section className="px-4 lg:px-8 py-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Heart className="w-4 h-4 text-polar-pink" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink">
+              Favoris
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {favMovies.map((m) => (
-              <div key={m.id} className={styles.favItem}>
-                <img src={m.posterUrl} alt={m.title} className={styles.favThumb} />
-                <div className={styles.favInfo}>
-                  <span className={styles.favName}>{m.title}</span>
-                  <span className={styles.favMeta}>{m.year} · {m.director}</span>
+              <Link key={m.id} to={`/movie/${m.id}`} className="group flex gap-3 p-2 bg-polar-surface border border-polar-border hover:border-polar-ink-3 transition-colors">
+                <div className="w-12 h-16 shrink-0 overflow-hidden bg-polar-white">
+                  <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" />
                 </div>
-              </div>
+                <div className="min-w-0 py-0.5">
+                  <p className="text-xs font-medium text-polar-ink truncate">{m.title}</p>
+                  <p className="text-[10px] text-polar-ink-3 mt-0.5">{m.year} · {m.director}</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {m.genre.slice(0, 1).map((g) => (
+                      <Badge key={g} variant="secondary" className="text-[8px]">{g}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
