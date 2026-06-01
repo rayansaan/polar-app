@@ -59,6 +59,8 @@ export const MovieDetailScreen: React.FC = () => {
     { id: 'about', label: 'Résumé' },
     { id: 'cast', label: 'Casting' },
     { id: 'keyscenes', label: 'Scènes clés' },
+    { id: 'similar', label: 'Similaires' },
+    { id: 'locations', label: 'Lieux' },
   ];
 
   const hasTmdbCast = movie.cast.length > 0 && movie.tmdbId;
@@ -263,23 +265,28 @@ export const MovieDetailScreen: React.FC = () => {
               {activeTab === 'cast' && (
                 <div>
                   {hasTmdbCast ? (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                       {movie.cast.map((actor) => (
-                        <div key={actor.id} className="bg-polar-surface border border-polar-border p-3 text-center">
+                        <div key={actor.id} className="bg-polar-surface border border-polar-border p-3 flex gap-3">
                           {actor.photoUrl ? (
                             <img
                               src={actor.photoUrl}
                               alt={actor.name}
-                              className="w-16 h-16 rounded-full object-cover mx-auto mb-2"
+                              className="w-16 h-16 rounded-full object-cover shrink-0"
                               loading="lazy"
                             />
                           ) : (
-                            <div className="w-16 h-16 rounded-full bg-polar-white mx-auto mb-2 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-full bg-polar-white shrink-0 flex items-center justify-center">
                               <User className="w-6 h-6 text-polar-ink-3" />
                             </div>
                           )}
-                          <span className="text-sm font-medium text-polar-ink block">{actor.name}</span>
-                          <span className="text-xs text-polar-ink-3">{actor.role}</span>
+                          <div className="min-w-0">
+                            <span className="text-sm font-medium text-polar-ink block">{actor.name}</span>
+                            <span className="text-xs text-polar-ink-3 block mb-1">{actor.role}</span>
+                            {actor.bio && (
+                              <p className="text-xs text-polar-ink-2 leading-relaxed line-clamp-3">{actor.bio}</p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -375,6 +382,71 @@ export const MovieDetailScreen: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'similar' && (
+                <div>
+                  {movie.similarMovies && movie.similarMovies.length > 0 ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                      {movie.similarMovies.map((similar) => (
+                        <div
+                          key={similar.id}
+                          className="bg-polar-surface border border-polar-border overflow-hidden cursor-pointer hover:border-polar-ink-3 transition-colors"
+                          onClick={() => navigate(`/movie/${similar.id}`)}
+                        >
+                          <div className="aspect-[2/3] bg-polar-white">
+                            {similar.posterUrl ? (
+                              <img
+                                src={similar.posterUrl}
+                                alt={similar.title}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Film className="w-8 h-8 text-polar-ink-3" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-2">
+                            <p className="text-sm font-medium text-polar-ink truncate">{similar.title}</p>
+                            <p className="text-xs text-polar-ink-3">{similar.year}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 bg-polar-surface border border-polar-border text-center">
+                      <Film className="w-8 h-8 mx-auto mb-2 text-polar-ink-3" />
+                      <p className="text-sm text-polar-ink-3">Films similaires disponibles après enrichissement</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'locations' && (
+                <div>
+                  {movie.locations && movie.locations.length > 0 ? (
+                    <div className="space-y-3">
+                      {movie.locations.map((location, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-polar-surface border border-polar-border">
+                          <div className="w-10 h-10 bg-polar-white flex items-center justify-center shrink-0">
+                            <span className="text-lg">📍</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-polar-ink">{location}</p>
+                            <p className="text-xs text-polar-ink-3">Lieu de tournage</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 bg-polar-surface border border-polar-border text-center">
+                      <Film className="w-8 h-8 mx-auto mb-2 text-polar-ink-3" />
+                      <p className="text-sm text-polar-ink-3">Lieux de tournage disponibles après enrichissement</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

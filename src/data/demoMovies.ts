@@ -1,6 +1,7 @@
 import type { EnrichedMovie } from '../types/enriched';
+import { enrichAllMovies } from './movieEnrichment';
 
-export const demoMovies: EnrichedMovie[] = [
+const rawDemoMovies: EnrichedMovie[] = [
   {
     id: 'demo-matrix', title: 'Matrix', year: 1999, director: 'Lana Wachowski, Lilly Wachowski',
     writers: ['Lana Wachowski', 'Lilly Wachowski'], duration: '2h16min', genre: ['Science-Fiction', 'Action'],
@@ -444,5 +445,7 @@ export const demoMovies: EnrichedMovie[] = [
     locations: ['Los Angeles'], type: 'film', popularity: 87, tmdbId: 105, tmdbRating: 8.5, tmdbVoteCount: 16000, tmdbTagline: 'Son histoire va vous ramener dans le passé',
   },
 ];
+
+export const demoMovies = enrichAllMovies(rawDemoMovies);
 
 export const demoArticles = [];

@@ -86,6 +86,13 @@ export interface EnrichedMovie {
     name: string;
     role: string;
     photoUrl: string;
+    bio?: string;
+  }[];
+  similarMovies?: {
+    id: string;
+    title: string;
+    year: number;
+    posterUrl: string;
   }[];
   keyScenes: {
     id: string;

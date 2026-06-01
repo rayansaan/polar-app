@@ -69,5 +69,5 @@ export interface Location {
   description: string;
 }
 
-export type TabType = 'about' | 'cast' | 'keyscenes';
+export type TabType = 'about' | 'cast' | 'keyscenes' | 'similar' | 'locations';
 export type BrowseCategory = 'newest' | 'popular' | 'interviews';
