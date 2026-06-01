@@ -59,7 +59,7 @@ export async function refreshTmdbData(movieId: string): Promise<void> {
 
   // Insérer le nouveau cast (top 10)
   if (credits.cast?.length > 0) {
-    const castInserts = credits.cast.slice(0, 10).map((actor) => ({
+    const castInserts = credits.cast.slice(0, 10).map((actor: any) => ({
       movie_id: movieId,
       tmdb_person_id: actor.id,
       name: actor.name,
@@ -78,7 +78,7 @@ export async function refreshTmdbData(movieId: string): Promise<void> {
 
   // Insérer les nouveaux films similaires
   if (similar.length > 0) {
-    const similarInserts = similar.map((movie) => ({
+    const similarInserts = similar.map((movie: any) => ({
       movie_id: movieId,
       similar_tmdb_id: movie.id,
       title: movie.title,

@@ -30,6 +30,25 @@ export const FeedScreen: React.FC = () => {
           </div>
         ) : error ? (
           <div className="px-4 lg:px-8 text-sm text-polar-ink-3">{error}</div>
+        ) : movies.length === 0 ? (
+          <div className="px-4 lg:px-8">
+            <div className="bg-polar-surface border border-polar-border p-8 text-center">
+              <Film className="w-12 h-12 text-polar-ink-3 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-polar-ink mb-2">Aucun film dans la base</h3>
+              <p className="text-sm text-polar-ink-3 mb-4">
+                Importez des films depuis TMDB pour les voir apparaître ici.
+              </p>
+              <div className="bg-polar-white border border-polar-border p-4 text-left text-xs font-mono">
+                <p className="font-bold mb-2">Pour importer des films :</p>
+                <ol className="list-decimal list-inside space-y-1 text-polar-ink-3">
+                  <li>Ouvrez un terminal dans le dossier <code className="bg-polar-surface px-1">tools/tmdb-importer</code></li>
+                  <li>Exécutez : <code className="bg-polar-surface px-1">npm install</code></li>
+                  <li>Créez un fichier <code className="bg-polar-surface px-1">.env</code> avec votre clé Supabase</li>
+                  <li>Exécutez : <code className="bg-polar-surface px-1">node importer.js 50</code></li>
+                </ol>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="flex lg:grid lg:grid-cols-5 gap-3 px-4 lg:px-8 overflow-x-auto lg:overflow-visible snap-x snap-mandatory pb-2 -mx-4 lg:mx-0 px-4 lg:px-8">
             {movies.slice(0, 5).map((movie, idx) => (
