@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { searchMovies } from '../services/tmdb';
 import { linkMovieToTmdb, refreshTmdbData, getUnmappedMovies, getMappedMovies } from '../services/enrichment';
+import { importMoviesFromTMDB } from '../services/import';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Search, Link2, RefreshCw, Film, CheckCircle } from 'lucide-react';
+import { Search, Link2, RefreshCw, Film, CheckCircle, Download, Loader2 } from 'lucide-react';
 import type { TmdbMovieSearchResult } from '../types/enriched';
 import { getImageUrl } from '../services/tmdb';
 
@@ -29,6 +30,18 @@ export const AdminScreen: React.FC = () => {
   const [linking, setLinking] = useState(false);
   const [refreshing, setRefreshing] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  
+  // Auto import states
+  const [importCount, setImportCount] = useState(50);
+  const [updateExisting, setUpdateExisting] = useState(true);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    imported: number;
+    updated: number;
+    skipped: number;
+    failed: number;
+    movies: Array<{ title: string; status: string; year: number }>;
+  } | null>(null);
 
   const loadMovies = useCallback(async () => {
     try {
@@ -93,6 +106,25 @@ export const AdminScreen: React.FC = () => {
     }
   };
 
+  const handleAutoImport = async () => {
+    try {
+      setImporting(true);
+      setImportResult(null);
+      setMessage('Import en cours... Cela peut prendre quelques minutes.');
+      
+      const result = await importMoviesFromTMDB(importCount, updateExisting);
+      setImportResult(result);
+      setMessage(`✅ Import terminé ! ${result.imported} importés, ${result.updated} mis à jour, ${result.skipped} ignorés, ${result.failed} échoués`);
+      
+      // Reload movies list
+      await loadMovies();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Erreur lors de l\'import');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
       <header className="px-4 lg:px-8 pt-6 pb-4">
@@ -116,6 +148,129 @@ export const AdminScreen: React.FC = () => {
       )}
 
       <div className="px-4 lg:px-8 space-y-8">
+        {/* Section Import Automatique */}
+        <section className="bg-polar-surface border border-polar-border p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <Download className="w-5 h-5 text-polar-ink" />
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink">
+                Import Automatique TMDB
+              </h2>
+              <p className="text-xs text-polar-ink-3 mt-1">
+                Importer automatiquement les films populaires depuis TMDB
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-polar-ink mb-2">
+                Nombre de films
+              </label>
+              <Input
+                type="number"
+                min={1}
+                max={100}
+                value={importCount}
+                onChange={(e) => setImportCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 50)))}
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={updateExisting}
+                  onChange={(e) => setUpdateExisting(e.target.checked)}
+                  className="w-4 h-4 rounded border-polar-border"
+                />
+                <span className="text-sm text-polar-ink">Mettre à jour les films existants</span>
+              </label>
+            </div>
+
+            <div className="flex items-end">
+              <Button
+                onClick={handleAutoImport}
+                disabled={importing}
+                className="w-full"
+              >
+                {importing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Import en cours...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Lancer l'import
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {importResult && (
+            <div className="mt-4 p-4 bg-polar-white border border-polar-border space-y-3">
+              <h3 className="text-sm font-semibold text-polar-ink">Résultat de l'import</h3>
+              <div className="grid grid-cols-4 gap-4 text-center">
+                <div className="p-2 bg-green-50 border border-green-200 rounded">
+                  <p className="text-2xl font-bold text-green-600">{importResult.imported}</p>
+                  <p className="text-xs text-green-700">Importés</p>
+                </div>
+                <div className="p-2 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-2xl font-bold text-blue-600">{importResult.updated}</p>
+                  <p className="text-xs text-blue-700">Mis à jour</p>
+                </div>
+                <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-2xl font-bold text-yellow-600">{importResult.skipped}</p>
+                  <p className="text-xs text-yellow-700">Ignorés</p>
+                </div>
+                <div className="p-2 bg-red-50 border border-red-200 rounded">
+                  <p className="text-2xl font-bold text-red-600">{importResult.failed}</p>
+                  <p className="text-xs text-red-700">Échoués</p>
+                </div>
+              </div>
+              
+              {importResult.movies.length > 0 && (
+                <div className="mt-3 max-h-60 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-polar-surface">
+                      <tr>
+                        <th className="text-left p-2 text-polar-ink-3">Film</th>
+                        <th className="text-left p-2 text-polar-ink-3">Année</th>
+                        <th className="text-left p-2 text-polar-ink-3">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importResult.movies.map((movie, idx) => (
+                        <tr key={idx} className="border-b border-polar-border">
+                          <td className="p-2 text-polar-ink">{movie.title}</td>
+                          <td className="p-2 text-polar-ink-3">{movie.year}</td>
+                          <td className="p-2">
+                            <span className={`inline-block px-2 py-1 rounded text-[10px] font-medium ${
+                              movie.status === 'imported' ? 'bg-green-100 text-green-700' :
+                              movie.status === 'updated' ? 'bg-blue-100 text-blue-700' :
+                              movie.status === 'skipped' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {movie.status === 'imported' ? 'Importé' :
+                               movie.status === 'updated' ? 'Mis à jour' :
+                               movie.status === 'skipped' ? 'Ignoré' : 'Échoué'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        <Separator className="bg-polar-border" />
+
         {/* Section films non mappés */}
         <section>
           <h2 className="text-sm font-bold uppercase tracking-wider text-polar-ink mb-4">

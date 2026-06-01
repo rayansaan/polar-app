@@ -1,0 +1,7 @@
+# For detailed configuration, please visit https://supabase.com/docs/guides/local-development
+
+[auth]
+enabled = true
+
+[functions.import-movies]
+verify_jwt = false
