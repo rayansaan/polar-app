@@ -1,95 +1,143 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useEnrichedMovies } from '../hooks/useEnrichedMovie';
 import { articles } from '../data';
+import { SortDropdown, type SortOption } from '../components/SortDropdown';
+import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Clock, ArrowRight, Film } from 'lucide-react';
+import { Clock, ArrowRight, Film, ChevronDown } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 10;
 
 export const FeedScreen: React.FC = () => {
-  const [limit, setLimit] = useState(10);
-  const { movies, loading, error } = useEnrichedMovies(limit, 0);
+  const [sortBy, setSortBy] = useState<SortOption>('random');
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
+  const { movies, loading, error } = useEnrichedMovies(50, 0, sortBy);
+
+  // Reset display count when sort changes
+  useEffect(() => {
+    setDisplayCount(ITEMS_PER_PAGE);
+  }, [sortBy]);
+
+  const displayedMovies = movies.slice(0, displayCount);
+  const hasMore = displayCount < movies.length;
+
+  const handleLoadMore = () => {
+    setDisplayCount((prev) => Math.min(prev + ITEMS_PER_PAGE, movies.length));
+  };
 
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
       {/* Header */}
       <header className="px-4 lg:px-8 pt-6 pb-4">
-        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-polar-ink">
-          À la une
-        </h1>
-        <p className="text-sm text-polar-ink-3 mt-1">
-          Les analyses et films du moment
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-polar-ink">
+              À la une
+            </h1>
+            <p className="text-sm text-polar-ink-3 mt-1">
+              Découvrez notre sélection de films analysés
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {!loading && movies.length > 0 && (
+              <span className="text-xs text-polar-ink-3">
+                {displayedMovies.length} / {movies.length} films
+              </span>
+            )}
+            <SortDropdown value={sortBy} onChange={setSortBy} />
+          </div>
+        </div>
       </header>
 
-      {/* Hero - Mobile horizontal scroll / Desktop grid */}
-      <section className="mb-8">
+      {/* Movies Grid */}
+      <section className="px-4 lg:px-8 mb-8">
         {loading ? (
-          <div className="px-4 lg:px-8">
-            <div className="h-64 bg-polar-surface border border-polar-border animate-pulse" />
-          </div>
-        ) : error ? (
-          <div className="px-4 lg:px-8 text-sm text-polar-ink-3">{error}</div>
-        ) : movies.length === 0 ? (
-          <div className="px-4 lg:px-8">
-            <div className="bg-polar-surface border border-polar-border p-8 text-center">
-              <Film className="w-12 h-12 text-polar-ink-3 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-polar-ink mb-2">Aucun film dans la base</h3>
-              <p className="text-sm text-polar-ink-3 mb-4">
-                Importez des films depuis TMDB pour les voir apparaître ici.
-              </p>
-              <div className="bg-polar-white border border-polar-border p-4 text-left text-xs font-mono">
-                <p className="font-bold mb-2">Pour importer des films :</p>
-                <ol className="list-decimal list-inside space-y-1 text-polar-ink-3">
-                  <li>Ouvrez un terminal dans le dossier <code className="bg-polar-surface px-1">tools/tmdb-importer</code></li>
-                  <li>Exécutez : <code className="bg-polar-surface px-1">npm install</code></li>
-                  <li>Créez un fichier <code className="bg-polar-surface px-1">.env</code> avec votre clé Supabase</li>
-                  <li>Exécutez : <code className="bg-polar-surface px-1">node importer.js 50</code></li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex lg:grid lg:grid-cols-5 gap-3 px-4 lg:px-8 overflow-x-auto lg:overflow-visible snap-x snap-mandatory pb-2 -mx-4 lg:mx-0 px-4 lg:px-8">
-            {movies.slice(0, 5).map((movie, idx) => (
-              <Link
-                key={movie.id}
-                to={`/movie/${movie.id}`}
-                className={`relative flex-shrink-0 snap-start group ${idx === 0 ? 'w-[280px] lg:w-auto lg:col-span-2 lg:row-span-2' : 'w-[140px] lg:w-auto'}`}
-              >
-                <div className={`relative overflow-hidden bg-polar-surface border border-polar-border ${idx === 0 ? 'aspect-[3/4] lg:aspect-auto lg:h-full' : 'aspect-[2/3]'}`}>
-                  {movie.posterUrl ? (
-                    <img
-                      src={movie.posterUrl}
-                      alt={movie.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading={idx < 2 ? 'eager' : 'lazy'}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-polar-surface">
-                      <Film className="w-8 h-8 text-polar-ink-3 mb-2" />
-                      <span className="text-xs text-polar-ink-3">Enrichissement en cours...</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <h3 className={`font-bold text-white leading-tight ${idx === 0 ? 'text-lg lg:text-xl' : 'text-sm'}`}>
-                      {movie.title}
-                    </h3>
-                    <p className="text-white/70 text-xs mt-0.5">
-                      {movie.year} · {movie.director}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+          /* Skeleton Grid */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+              <Skeleton key={i} variant="card" />
             ))}
           </div>
+        ) : error ? (
+          <div className="bg-polar-surface border border-polar-border p-8 text-center">
+            <p className="text-polar-ink-3">{error}</p>
+          </div>
+        ) : movies.length === 0 ? (
+          <div className="bg-polar-surface border border-polar-border p-8 text-center">
+            <Film className="w-12 h-12 text-polar-ink-3 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-polar-ink mb-2">Aucun film disponible</h3>
+            <p className="text-sm text-polar-ink-3">
+              Les films seront bientôt disponibles.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {displayedMovies.map((movie) => (
+                <Link
+                  key={movie.id}
+                  to={`/movie/${movie.id}`}
+                  className="group"
+                >
+                  <div className="relative overflow-hidden bg-polar-surface border border-polar-border aspect-[2/3]">
+                    {movie.posterUrl ? (
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-polar-surface">
+                        <Film className="w-8 h-8 text-polar-ink-3 mb-2" />
+                        <span className="text-xs text-polar-ink-3 text-center px-2">{movie.title}</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-white/70 text-xs">
+                        {movie.year} · {movie.director}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <h3 className="text-xs font-medium text-polar-ink truncate">
+                      {movie.title}
+                    </h3>
+                    <p className="text-[10px] text-polar-ink-3">
+                      {movie.year}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="mt-8 text-center">
+                <button
+                  type="button"
+                  onClick={handleLoadMore}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-polar-surface border border-polar-border text-sm font-medium text-polar-ink hover:border-polar-ink-3 transition-colors"
+                >
+                  Charger plus
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                <p className="text-xs text-polar-ink-3 mt-2">
+                  {displayedMovies.length} sur {movies.length} films
+                </p>
+              </div>
+            )}
+          </>
         )}
       </section>
 
       <Separator className="mx-4 lg:mx-8 bg-polar-border" />
 
-      {/* Analyses section */}
+      {/* Analyses Section */}
       <section className="px-4 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -109,9 +157,10 @@ export const FeedScreen: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {articles.map((article) => (
-            <article
+            <Link
               key={article.id}
-              className="group flex gap-4 p-3 bg-polar-surface border border-polar-border hover:border-polar-ink-3 transition-colors cursor-pointer"
+              to={`/movie/${article.id.replace('article-', 'demo-')}`}
+              className="group flex gap-4 p-3 bg-polar-surface border border-polar-border hover:border-polar-ink-3 transition-colors"
             >
               <div className="flex-shrink-0 w-24 h-24 lg:w-32 lg:h-28 overflow-hidden bg-polar-white">
                 <img
@@ -143,22 +192,12 @@ export const FeedScreen: React.FC = () => {
                   <span>{article.category}</span>
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
-
-      {movies.length >= limit && (
-        <div className="px-4 lg:px-8 pb-8">
-          <button
-            type="button"
-            onClick={() => setLimit((prev) => prev + 10)}
-            className="w-full py-3 bg-polar-surface border border-polar-border text-sm font-medium text-polar-ink hover:border-polar-ink-3 transition-colors"
-          >
-            Charger plus
-          </button>
-        </div>
-      )}
     </div>
   );
 };
+
+export default FeedScreen;

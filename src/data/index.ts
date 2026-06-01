@@ -1,57 +1,6 @@
-import type { Article, Location } from '../types';
+export { articles } from './articles';
 
-export const articles: Article[] = [
-  {
-    id: '1',
-    title: 'La révolution visuelle de Blade Runner 2049',
-    subtitle: 'Comment Denis Villeneuve a réinventé l\'esthétique cyberpunk pour une nouvelle génération.',
-    category: 'analysis',
-    readTime: 12,
-    imageUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&q=75',
-    tags: ['Science-Fiction', 'Direction photo'],
-    date: '2024-01-15',
-  },
-  {
-    id: '2',
-    title: 'Le jazz dans La La Land : une métaphore visuelle',
-    subtitle: 'Analyse des choix musicaux et de leur traduction cinématographique.',
-    category: 'analysis',
-    readTime: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=75',
-    tags: ['Comédie musicale', 'Sound design'],
-    date: '2024-01-10',
-  },
-  {
-    id: '3',
-    title: 'Inception et l\'architecture des rêves',
-    subtitle: 'Décryptage des techniques de mise en scène de Nolan.',
-    category: 'analysis',
-    readTime: 15,
-    imageUrl: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600&q=75',
-    tags: ['Thriller', 'Montage'],
-    date: '2024-01-05',
-  },
-  {
-    id: '4',
-    title: 'Parasite : la géométrie sociale',
-    subtitle: 'Comment Bong Joon-ho utilise l\'espace architectural pour raconter la lutte des classes.',
-    category: 'analysis',
-    readTime: 10,
-    imageUrl: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=600&q=75',
-    tags: ['Thriller', 'Mise en scène'],
-    date: '2024-01-01',
-  },
-  {
-    id: '5',
-    title: 'L\'intensité dramatique dans Whiplash',
-    subtitle: 'L\'analyse du rythme et du montage pour créer la tension.',
-    category: 'analysis',
-    readTime: 9,
-    imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=75',
-    tags: ['Drame', 'Rythme'],
-    date: '2023-12-28',
-  },
-];
+import type { Location } from '../types';
 
 export const locations: Location[] = [
   {
