@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getEnrichedMovies, getEnrichedMovie } from '../services/enrichment';
+import { getMoviesWithFallback, getMovieWithFallback } from '../services/movieService';
 import type { EnrichedMovie } from '../types/enriched';
 
 export function useEnrichedMovies(limit: number = 10, offset: number = 0) {
@@ -11,7 +11,8 @@ export function useEnrichedMovies(limit: number = 10, offset: number = 0) {
     async function fetchMovies() {
       try {
         setLoading(true);
-        const data = await getEnrichedMovies(limit, offset);
+        // Essayer d'abord Supabase, fallback sur données démo
+        const data = await getMoviesWithFallback(limit, offset);
         setMovies(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur de chargement');
@@ -35,7 +36,8 @@ export function useEnrichedMovie(movieId: string | undefined) {
     if (!movieId) return;
     try {
       setLoading(true);
-      const data = await getEnrichedMovie(movieId);
+      // Essayer d'abord Supabase, fallback sur données démo
+      const data = await getMovieWithFallback(movieId);
       setMovie(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
