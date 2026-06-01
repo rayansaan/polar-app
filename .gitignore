@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 .env
+.env.local
+scripts/.env
+tools/*/.env
+
+# SQL backups
+*.sql
 
 # Editor directories and files
 .vscode/*
