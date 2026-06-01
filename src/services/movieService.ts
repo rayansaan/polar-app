@@ -1,6 +1,10 @@
 import { supabase } from '../lib/supabase';
 import { demoMovies } from '../data/demoMovies';
+import { demoMoviesPart2 } from '../data/demoMovies2';
 import type { EnrichedMovie } from '../types/enriched';
+
+// Fusionner les deux parties de films démo
+const allDemoMovies: EnrichedMovie[] = [...demoMovies, ...demoMoviesPart2];
 
 let useDemoData = false;
 
@@ -19,13 +23,13 @@ export async function getMoviesWithFallback(limit: number = 10, offset: number =
     if (error) {
       console.warn('Erreur Supabase, utilisation des données démo:', error.message);
       useDemoData = true;
-      return demoMovies.slice(offset, offset + limit);
+      return allDemoMovies.slice(offset, offset + limit);
     }
 
     if (!movies || movies.length === 0) {
       console.log('Aucun film dans Supabase, utilisation des données démo');
       useDemoData = true;
-      return demoMovies.slice(offset, offset + limit);
+      return allDemoMovies.slice(offset, offset + limit);
     }
 
     // Mapper les films Supabase
@@ -70,7 +74,7 @@ export async function getMoviesWithFallback(limit: number = 10, offset: number =
 export async function getMovieWithFallback(movieId: string): Promise<EnrichedMovie | null> {
   // Si c'est un ID démo
   if (movieId.startsWith('demo-')) {
-    return demoMovies.find(m => m.id === movieId) || null;
+    return allDemoMovies.find(m => m.id === movieId) || null;
   }
 
   try {
